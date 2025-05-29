@@ -6,13 +6,23 @@
     <title>Interactive MGT211 Concepts Explorer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Visualization & Content Choices: 
-        - Concept of Business: Goal: Inform. Method: Structured text (headings, lists, paragraphs). Interaction: Read-only. Justification: Basic definitions and characteristics are best presented textually.
-        - Sole Proprietorship & Partnership: Goal: Compare & Inform. Method: Structured text, toggleable lists for Advantages/Disadvantages. Interaction: Click to expand/collapse lists. Justification: Manages lengthy lists and allows focused comparison.
-        - Types of Industry: Goal: Organize & Inform. Method: Hierarchical list structure (HTML <ul>/<li> or styled divs). Interaction: Read-only. Justification: Clearly presents categorical information.
+    <!-- Visualization & Content Choices:
+        - Concept of Business: Goal: Inform. Method: Structured text (headings, lists, paragraphs), simple block diagram. Interaction: Read-only. Justification: Basic definitions and characteristics are best presented textually, diagram provides quick visual summary.
+        - Economic and Demographic Environment: Goal: Inform, illustrate factors. Method: Structured text, block diagrams for influencing factors. Interaction: Read-only. Justification: Visualizes complex relationships and influences.
+        - Types of Industry: Goal: Organize & Inform. Method: Hierarchical list structure (HTML <ul>/<li> or styled divs), block diagram for hierarchy. Interaction: Read-only. Justification: Clearly presents categorical information and their relationships.
+        - Trade and Aids to Trade: Goal: Organize & Inform. Method: Structured text, hierarchy diagram for trade types, input-output for commerce. Interaction: Read-only. Justification: Visualizes classifications and the flow of commerce.
+        - Scope of Business Organization: Goal: Organize & Inform. Method: Structured text, hierarchy diagram for forms. Interaction: Read-only. Justification: Visually lists and groups organizational structures.
+        - Sole Proprietorship & Partnership: Goal: Compare & Inform. Method: Structured text, toggleable lists for Advantages/Disadvantages, comparison table. Interaction: Click to expand/collapse lists, view comparative data. Justification: Manages lengthy lists and allows focused comparison of two forms.
+        - Joint Stock Company: Goal: Inform, illustrate process. Method: Structured text, toggleable lists, flowchart for formation. Interaction: Click to expand/collapse lists, follow process steps. Justification: Breaks down complex legal process into understandable steps.
+        - Cooperative Society: Goal: Inform. Method: Structured text, toggleable lists. Interaction: Click to expand/collapse lists. Justification: Standardized presentation for textual information.
+        - Components of Business Plan: Goal: Organize & Inform. Method: Structured text, visual representation of components. Interaction: Read-only. Justification: Clearly outlines the sections of a business plan.
+        - Franchising, E-commerce: Goal: Inform. Method: Structured text, simple input-output for franchising. Interaction: Read-only. Justification: Explains the flow of the franchising model.
+        - Joint Venture, Strategic Alliance, Merger and Acquisition: Goal: Compare & Inform. Method: Structured text, comparison table/hierarchy for collaboration types. Interaction: Read-only. Justification: Differentiates various forms of business collaboration.
+        - Import, Export, Tariff and Balance of Payment: Goal: Inform. Method: Structured text, input-output for trade balance. Interaction: Read-only. Justification: Visualizes the flow of goods and money in international trade.
+        - Management Process, Types and Areas: Goal: Inform, illustrate process/hierarchy. Method: Structured text, flowchart for management functions, hierarchy for manager types. Interaction: Read-only. Justification: Clarifies sequential steps and organizational levels.
+        - Job Analysis & Recruiting: Goal: Compare & Inform. Method: Structured text, comparison table for job description vs. specification. Interaction: Read-only. Justification: Highlights differences between key HR documents.
+        - Cost-Of-Living Adjustment (COLA): Goal: Inform. Method: Structured text. Interaction: Read-only. Justification: Concept is best explained textually.
         - Product Life Cycle: Goal: Illustrate a dynamic concept. Method: Line chart (Chart.js on Canvas) showing stages. Interaction: Hover for tooltips (default Chart.js). Justification: Visually represents the progression and is more engaging than text alone.
-        - Other textual concepts (e.g., Trade, Joint Stock Co., Marketing): Goal: Inform. Method: Structured text, toggleable sections for detailed lists. Interaction: Navigation selection, content toggles. Justification: Standardized presentation for textual information, ensuring consistency and usability.
-        - Diagrams (e.g., Business Components from PDF p4): Goal: Illustrate structure. Method: Recreated using HTML divs and Tailwind CSS for simple block diagrams. Interaction: Read-only. Justification: Provides a visual representation of relationships as in the source, without using SVG.
     -->
     <style>
         body {
@@ -75,15 +85,56 @@
             margin: 0.5rem;
             text-align: center;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            min-width: 120px; /* Ensure boxes are wide enough */
         }
         .diagram-connector {
             width: 1px;
             background-color: #F97316; /* orange-500 */
             margin: 0.25rem 0;
+            height: 20px; /* Default height for connectors */
         }
         .diagram-horizontal-group {
             display: flex;
             justify-content: center;
+            flex-wrap: wrap; /* Allow wrapping for smaller screens */
+        }
+        .diagram-arrow {
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid #F97316; /* orange-500 */
+            margin: 0 auto;
+        }
+        .diagram-horizontal-connector {
+            height: 1px;
+            background-color: #F97316;
+            width: 50px; /* Default width for horizontal connectors */
+            margin: 0 0.5rem;
+        }
+        .diagram-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            width: 100%;
+        }
+        .diagram-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .diagram-table th, .diagram-table td {
+            border: 1px solid #FDBA74;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        .diagram-table th {
+            background-color: #F97316;
+            color: white;
+            font-weight: bold;
+        }
+        .diagram-table tr:nth-child(even) {
+            background-color: #FFF7ED;
         }
     </style>
 </head>
@@ -172,6 +223,16 @@
                     <p class="mb-4 text-lg">Understanding the economic and demographic environments is vital for any business. These external factors significantly influence how businesses operate, what products they offer, and how they reach their customers.</p>
                     <h3 class="text-xl font-semibold text-orange-600 mb-2">Economic Environment</h3>
                     <p class="mb-3">This refers to the overall conditions of the economic system in which a business operates. It includes factors like: </p>
+                    <div class="diagram-container my-4">
+                        <div class="diagram-box">Economic Environment</div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-horizontal-group">
+                            <div class="diagram-box text-sm">Economic Growth</div>
+                            <div class="diagram-box text-sm">Economic Stability</div>
+                            <div class="diagram-box text-sm">Government Policies</div>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Key factors influencing the Economic Environment.</p>
                     <ul class="list-disc list-inside ml-4 mb-3 space-y-1">
                         <li><strong>Economic Growth:</strong> How much the economy is expanding. This is measured by things like:
                             <ul class="list-circle list-inside ml-6">
@@ -191,6 +252,17 @@
                     </ul>
                     <h4 class="text-lg font-medium text-orange-500 my-2">Managing the Economy (Government Policies)</h4>
                     <p class="mb-3">Governments use different policies to influence the economy:</p>
+                    <div class="diagram-container my-4">
+                        <div class="diagram-box">Government</div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-horizontal-group">
+                            <div class="diagram-box text-sm">Fiscal Policies</div>
+                            <div class="diagram-box text-sm">Monetary Policies</div>
+                        </div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-box">Stabilization Policy</div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">How Government Policies Influence the Economy.</p>
                     <ul class="list-disc list-inside ml-4 mb-3 space-y-1">
                         <li><strong>Fiscal Policies:</strong> These are government decisions about how to collect money (through taxes) and how to spend it (on public services, infrastructure, etc.).</li>
                         <li><strong>Monetary Policies:</strong> These are government actions that control the amount of money circulating in the economy, often managed by central banks (e.g., setting interest rates).</li>
@@ -199,20 +271,30 @@
 
                     <h3 class="text-xl font-semibold text-orange-600 mt-6 mb-2">Demographic Environment</h3>
                     <p class="mb-3">This involves studying the characteristics of a population. These characteristics include:</p>
+                    <div class="diagram-container my-4">
+                        <div class="diagram-box">Demographic Environment</div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-grid">
+                            <div class="diagram-box text-sm">Population Size & Growth</div>
+                            <div class="diagram-box text-sm">Gender & Age Distribution</div>
+                            <div class="diagram-box text-sm">Income Levels</div>
+                            <div class="diagram-box text-sm">Education Levels</div>
+                            <div class="diagram-box text-sm">Geographic Location</div>
+                            <div class="diagram-box text-sm">Family Structures</div>
+                        </div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-box">Influence on Business</div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Key characteristics of the Demographic Environment and their influence.</p>
                     <ul class="list-disc list-inside ml-4 mb-3 space-y-1">
-                        <li>Population size and growth rate</li>
-                        <li>Distribution by gender and age</li>
-                        <li>Income levels</li>
-                        <li>Education levels</li>
-                        <li>Geographic location</li>
-                        <li>Family structures</li>
-                    </ul>
-                    <p class="mb-3">The demographic environment significantly influences a business by affecting:</p>
-                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1">
-                        <li>The size of demand for products and services.</li>
-                        <li>Customers' buying patterns and preferences.</li>
-                        <li>The availability and types of labor supply (e.g., skilled vs. unskilled workers).</li>
-                        <li>Overall business planning and strategy.</li>
+                        <li>The demographic environment significantly influences a business by affecting:
+                            <ul class="list-circle list-inside ml-6">
+                                <li>The size of demand for products and services.</li>
+                                <li>Customers' buying patterns and preferences.</li>
+                                <li>The availability and types of labor supply (e.g., skilled vs. unskilled workers).</li>
+                                <li>Overall business planning and strategy.</li>
+                            </ul>
+                        </li>
                     </ul>
                 `
             },
@@ -226,7 +308,7 @@
                     
                     <div class="diagram-container my-4">
                         <div class="diagram-box">Industry</div>
-                        <div class="diagram-connector" style="height: 20px;"></div>
+                        <div class="diagram-connector"></div>
                         <div class="diagram-horizontal-group">
                             <div class="diagram-box">Primary Industry</div>
                             <div class="diagram-box">Secondary Industry</div>
@@ -269,9 +351,42 @@
                     <p class="mb-4 text-lg">Commerce is the backbone of business, ensuring that goods and services move efficiently from where they are produced to where they are consumed. It encompasses both trade (the actual buying and selling) and the various "aids" that facilitate this process.</p>
                     <h3 class="text-xl font-semibold text-orange-600 mb-2">Commerce: Trade and its Supporters</h3>
                     <p class="mb-3">"Commerce" is a broad term that includes all activities, functions, and institutions involved in transferring goods from their point of production to the ultimate consumers. Simply put, it's about "trade and aids to trade."</p>
+                    <div class="diagram-container my-4">
+                        <div class="diagram-box">Commerce</div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-horizontal-group">
+                            <div class="diagram-box">Trade</div>
+                            <div class="diagram-box">Aids to Trade</div>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">The two main components of Commerce.</p>
 
                     <h4 class="text-lg font-medium text-orange-500 my-2">Trade: The Exchange of Goods</h4>
                     <p class="mb-1">Trade is the actual procedure of transferring or distributing goods from producers to consumers. It can happen in two main ways:</p>
+                    <div class="diagram-container my-4">
+                        <div class="diagram-box">Trade</div>
+                        <div style="display: flex; justify-content: space-around; width: 100%;">
+                            <div class="diagram-connector" style="height: 20px; transform: rotate(45deg) translateX(-10px) translateY(5px);"></div>
+                            <div class="diagram-connector" style="height: 20px; transform: rotate(-45deg) translateX(10px) translateY(5px);"></div>
+                        </div>
+                        <div class="diagram-horizontal-group">
+                            <div class="diagram-box">Home Trade</div>
+                            <div class="diagram-box">Foreign Trade</div>
+                        </div>
+                         <div style="display: flex; width: 100%; justify-content: space-around; margin-top: 0.5rem;">
+                           <div class="diagram-vertical-group" style="align-items:center; display:flex; flex-direction: column;">
+                             <div class="diagram-connector" style="height: 10px;"></div>
+                             <div class="diagram-box text-sm">Wholesale</div>
+                             <div class="diagram-box text-sm">Retail</div>
+                           </div>
+                           <div class="diagram-vertical-group" style="align-items:center; display:flex; flex-direction: column;">
+                             <div class="diagram-connector" style="height: 10px;"></div>
+                             <div class="diagram-box text-sm">Import</div>
+                             <div class="diagram-box text-sm">Export</div>
+                           </div>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Classification of Trade types.</p>
                     <ul class="list-disc list-inside ml-4 mb-3 space-y-1">
                         <li><strong>Home Trade (Internal Trade):</strong> This is the buying and selling of goods within the boundaries of a single country.
                             <ul class="list-circle list-inside ml-6">
@@ -289,6 +404,21 @@
 
                     <h4 class="text-lg font-medium text-orange-500 my-2">Aids to Trade: Facilitating the Process</h4>
                     <p class="mb-1">These are activities that help trade flow smoothly, bridging gaps between producers and consumers:</p>
+                    <div class="diagram-container my-4">
+                        <div class="diagram-box">Aids to Trade</div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-grid">
+                            <div class="diagram-box text-sm">Banking</div>
+                            <div class="diagram-box text-sm">Transportation</div>
+                            <div class="diagram-box text-sm">Insurance</div>
+                            <div class="diagram-box text-sm">Warehousing</div>
+                            <div class="diagram-box text-sm">Agents</div>
+                            <div class="diagram-box text-sm">Finance</div>
+                            <div class="diagram-box text-sm">Advertising</div>
+                            <div class="diagram-box text-sm">Communication</div>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Key activities that facilitate trade.</p>
                     <ul class="list-disc list-inside ml-4 mb-3 space-y-1">
                         <li><strong>Banking:</strong> Provides financial services like facilitating payments between buyers and sellers, offering loans, and managing funds.</li>
                         <li><strong>Transportation:</strong> Physically moves goods from where they are produced to where they are needed, overcoming geographical barriers.</li>
@@ -310,6 +440,18 @@
                     <p class="mb-3">A business organization is essentially the grouping of activities and resources in a way that allows for effective cooperation to achieve specific business objectives. It's about setting up the framework for how a business will operate.</p>
                     <h3 class="text-xl font-semibold text-orange-600 mb-2">Forms of Business Organization</h3>
                     <p class="mb-3">There are several common forms that a business organization can take, each with its own legal structure, advantages, and disadvantages:</p>
+                    <div class="diagram-container my-4">
+                        <div class="diagram-box">Forms of Business Organization</div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-grid">
+                            <div class="diagram-box text-sm">Sole Proprietorship</div>
+                            <div class="diagram-box text-sm">Partnership</div>
+                            <div class="diagram-box text-sm">Joint Stock Company</div>
+                            <div class="diagram-box text-sm">Co-operative Societies</div>
+                            <div class="diagram-box text-sm">Combination</div>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Hierarchy of common business organization forms.</p>
                     <ul class="list-disc list-inside mb-3 space-y-1">
                         <li>Sole Proprietorship</li>
                         <li>Partnership</li>
@@ -334,7 +476,7 @@
                     </ul>
                     <button class="toggle-button bg-orange-200 text-orange-800 px-3 py-1 rounded-md mb-1 text-sm">Advantages</button>
                     <ul class="list-disc list-inside ml-4 mb-3 space-y-1 hidden">
-                        <li><strong>Direct contact with customers/workers:</strong> Allows for personalized service and direct feedback.</li><li><strong>Easy Formation/Dissolution:</strong> Minimal paperwork and legal costs.</li><li><strong>Entire Profit/Control:</strong> Owner has full control over decisions and keeps all earnings.</li><li><strong>Flexibility:</strong> Can quickly adapt to market changes.</li><li><strong>Independence:</strong> Owner is their own boss.</li><li><strong>Personal Satisfaction:</strong> Sense of accomplishment from running one's own venture.</li><li><strong>Quick Decisions:</strong> No need to consult with others.</li><li><strong>Tax savings:</strong> Profits are taxed as personal income, avoiding corporate taxes.</li>
+                        <li><strong>Direct contact with customers/workers:</strong> Allows for personalized service and direct feedback.</li><li><strong>Easy Formation/Dissolution:</strong> Minimal paperwork and legal costs.</li><li><strong>Entire Profit/Control:</strong> Owner has full control over decisions and keeps all earnings.</li></li><li><strong>Flexibility:</strong> Can quickly adapt to market changes.</li><li><strong>Independence:</strong> Owner is their own boss.</li><li><strong>Personal Satisfaction:</strong> Sense of accomplishment from running one's own venture.</li><li><strong>Quick Decisions:</strong> No need to consult with others.</li><li><strong>Tax savings:</strong> Profits are taxed as personal income, avoiding corporate taxes.</li>
                     </ul>
                     <button class="toggle-button bg-orange-200 text-orange-800 px-3 py-1 rounded-md mb-1 text-sm">Disadvantages</button>
                     <ul class="list-disc list-inside ml-4 mb-3 space-y-1 hidden">
@@ -365,6 +507,59 @@
                     </ul>
                      <h4 class="text-lg font-medium text-orange-500 my-2">Partnership Deed</h4>
                      <p class="mb-3">The Partnership Deed is a crucial document (preferably written) that outlines the terms and conditions of the partnership. It typically includes details like the firm's name, capital contributions, profit and loss distribution ratios, duties of partners, and provisions for arbitration in case of disputes.</p>
+                     <h4 class="text-lg font-medium text-orange-500 my-2">Comparison: Sole Proprietorship vs. Partnership</h4>
+                     <table class="diagram-table">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Sole Proprietorship</th>
+                                <th>Partnership</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Ownership</td>
+                                <td>Single individual</td>
+                                <td>Two or more persons</td>
+                            </tr>
+                            <tr>
+                                <td>Liability</td>
+                                <td>Unlimited</td>
+                                <td>Unlimited (for general partners)</td>
+                            </tr>
+                            <tr>
+                                <td>Capital</td>
+                                <td>Limited (owner's personal funds)</td>
+                                <td>More than sole prop, less than company</td>
+                            </tr>
+                            <tr>
+                                <td>Formation</td>
+                                <td>Very easy, minimal formalities</td>
+                                <td>Easy, based on agreement (deed)</td>
+                            </tr>
+                            <tr>
+                                <td>Life</td>
+                                <td>Limited (tied to owner)</td>
+                                <td>Limited (can dissolve on partner exit)</td>
+                            </tr>
+                            <tr>
+                                <td>Decision Making</td>
+                                <td>Quick, by single owner</td>
+                                <td>Shared, can be slower due to consensus</td>
+                            </tr>
+                            <tr>
+                                <td>Secrecy</td>
+                                <td>High</td>
+                                <td>High (but less than sole prop if disputes)</td>
+                            </tr>
+                            <tr>
+                                <td>Expansion</td>
+                                <td>Difficult</td>
+                                <td>Easier than sole prop, but still limited</td>
+                            </tr>
+                        </tbody>
+                     </table>
+                     <p class="text-sm text-gray-600 mt-2 mb-4">A comparative overview of Sole Proprietorship and Partnership.</p>
                 `
             },
             {
@@ -373,7 +568,7 @@
                 content: `
                     <p class="mb-4 text-lg">The Joint Stock Company is a powerful form of business organization, distinct from sole proprietorships and partnerships due to its legal structure, ability to raise large capital, and limited liability for its owners (shareholders). It's a complex but highly effective structure for large-scale operations.</p>
                     <h3 class="text-xl font-semibold text-orange-600 mb-2">Definition</h3>
-                    <p class="mb-3">A Joint Stock Company is a voluntary association of persons created by law for commercial purposes. A key feature is its "separate legal entity," meaning it exists independently of its owners (shareholders) and can enter into contracts, own property, and be sued in its own name.</p>
+                    <p class="mb-3">A Joint Stock Company is a voluntary association of persons created by law for commercial purposes, possessing a "separate legal entity," meaning it exists independently of its owners (shareholders) and can enter into contracts, own property, and be sued in its own name.</p>
                     <h3 class="text-xl font-semibold text-orange-600 mb-2">Features</h3>
                     <ul class="list-disc list-inside mb-3 space-y-1">
                         <li><strong>Creation of Law:</strong> It comes into existence through a legal process (registration).</li>
@@ -404,6 +599,19 @@
                     </ul>
                     <h4 class="text-lg font-medium text-orange-500 my-2">Formation Procedure</h4>
                     <p class="mb-3">Forming a Joint Stock Company involves several distinct stages:</p>
+                    <div class="diagram-container my-4">
+                        <div class="diagram-box">Promotion Stage</div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-box">Incorporation Stage</div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-box">Capital Subscription Stage</div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-box">Certificate of Commencement</div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Flowchart of Joint Stock Company Formation Procedure.</p>
                     <ul class="list-disc list-inside ml-4 mb-3 space-y-1">
                         <li><strong>Promotion Stage:</strong> This is the initial phase where the idea for the business is conceived, investigated for feasibility, and necessary factors (like resources, financial sources) are assembled. Essential documents like the Memorandum of Association, Articles of Association, and Prospectus are prepared.</li>
                         <li><strong>Incorporation Stage:</strong> This involves filing all required documents with the Registrar of Companies and paying the registration fee. Upon satisfaction, the Registrar issues a Certificate of Incorporation, officially bringing the company into existence.</li>
@@ -411,11 +619,43 @@
                         <li><strong>Certificate of Commencement:</strong> For public companies, this certificate is required before they can start business operations. It is issued after the company has issued a prospectus, allotted shares, and received the minimum subscription amount.</li>
                     </ul>
                     <h4 class="text-lg font-medium text-orange-500 my-2">Types: Public vs. Private Limited Company</h4>
-                    <p class="mb-3">Joint Stock Companies are primarily divided into two types, with key differences:</p>
-                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1">
-                        <li><strong>Public Limited Company:</strong> Can offer shares to the general public, has a minimum of 7 members (no maximum), and shares are freely transferable. Subject to more stringent regulations.</li>
-                        <li><strong>Private Limited Company:</strong> Shares cannot be offered to the public, has 2-50 members, and share transfer is restricted. Generally has fewer regulatory requirements.</li>
-                    </ul>
+                    <table class="diagram-table">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Public Limited Company</th>
+                                <th>Private Limited Company</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Members (Min/Max)</td>
+                                <td>Min 7 / No Max</td>
+                                <td>Min 2 / Max 50</td>
+                            </tr>
+                            <tr>
+                                <td>Shares to Public</td>
+                                <td>Yes</td>
+                                <td>No</td>
+                            </tr>
+                            <tr>
+                                <td>Share Transfer</td>
+                                <td>Freely transferable</td>
+                                <td>Restricted</td>
+                            </tr>
+                            <tr>
+                                <td>Regulatory Burden</td>
+                                <td>More stringent</td>
+                                <td>Fewer requirements</td>
+                            </tr>
+                            <tr>
+                                <td>Commencement</td>
+                                <td>Requires Certificate of Commencement</td>
+                                <td>Can commence business upon incorporation</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="text-sm text-gray-600 mt-2 mb-4">Comparison of Public vs. Private Limited Company.</p>
                 `
             },
             {
@@ -425,6 +665,15 @@
                     <p class="mb-4 text-lg">A Cooperative Society is a unique form of organization driven by the principle of "self-help through mutual help." Unlike profit-driven businesses, its primary aim is to protect and promote the economic interests of its members, often those with limited means.</p>
                     <h3 class="text-xl font-semibold text-orange-600 mb-2">Definition</h3>
                     <p class="mb-3">A Cooperative Society is formed by people of limited financial means who come together to help each other, aiming to protect the economically weaker sections of society. Its core motto is "self-help, not competition."</p>
+                    <div class="diagram-container my-4">
+                        <div class="diagram-box">Members with Limited Means</div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-box">Mutual Help & Cooperation</div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-box">Protection of Economic Interests</div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">The core principle of a Cooperative Society: Self-Help through Mutual Help.</p>
                     <button class="toggle-button bg-orange-200 text-orange-800 px-3 py-1 rounded-md mb-1 text-sm">Advantages</button>
                     <ul class="list-disc list-inside ml-4 mb-3 space-y-1 hidden">
                         <li><strong>Advantage for Farmers:</strong> Often helps farmers by providing resources, marketing support, or fair prices for their produce.</li><li><strong>Easy Formation:</strong> Relatively simple to establish with fewer legal formalities compared to companies.</li><li><strong>Equal Rights:</strong> Each member typically has one vote, regardless of their shareholding, promoting democratic control.</li><li><strong>Equal Distribution of Wealth:</strong> Profits are often distributed based on member participation rather than capital contributed, promoting equity.</li><li><strong>Economic Democracy:</strong> Members have a say in decision-making.</li><li><strong>Elimination of Middlemen:</strong> Can directly connect producers and consumers, reducing costs.</li><li><strong>Financial Assistance:</strong> May receive support or loans from government or other cooperative bodies.</li><li><strong>Friendly Relations:</strong> Fosters a sense of community and mutual support among members.</li><li><strong>Improve Standard of Living:</strong> Helps members improve their economic well-being.</li><li><strong>Increase in Employment:</strong> Can create job opportunities within the community.</li><li><strong>Limited Liability:</strong> Members' liability is usually limited to their share capital.</li><li><strong>Mutual Cooperation:</strong> Operates on the principle of working together for common benefit.</li><li><strong>No Monopoly:</strong> Focus on service rather than market dominance.</li><li><strong>Open Membership:</strong> Generally open to anyone who shares the common interest and can fulfill membership criteria.</li><li><strong>Protection of Mutual Interest:</strong> Designed to safeguard the economic interests of its members.</li><li><strong>Responsibility:</strong> Members share in the responsibility of the society's operations.</li><li><strong>Supply according to Demand:</strong> Can often tailor supply to meet members' specific needs.</li><li><strong>Stable Life:</strong> Can have a relatively stable existence as it's not solely profit-driven.</li><li><strong>Saving in Expenditure:</strong> Members can benefit from bulk purchasing or shared services.</li><li><strong>Tax Concession:</strong> Often receives tax benefits from the government.</li>
@@ -450,6 +699,19 @@
                     </ul>
                     <h3 class="text-xl font-semibold text-orange-600 mb-2">Key Components of a Business Plan</h3>
                     <p class="mb-3">While plans can vary, most comprehensive business plans include the following essential sections:</p>
+                    <div class="diagram-container my-4">
+                        <div class="diagram-box">Business Plan</div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-grid">
+                            <div class="diagram-box text-sm">Objectives</div>
+                            <div class="diagram-box text-sm">Business Name</div>
+                            <div class="diagram-box text-sm">Location</div>
+                            <div class="diagram-box text-sm">Marketing Component</div>
+                            <div class="diagram-box text-sm">Financial Analysis</div>
+                            <div class="diagram-box text-sm">Administrative Rights & Provisions</div>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Key components typically found in a Business Plan.</p>
                     <ul class="list-disc list-inside mb-3 space-y-1">
                         <li><strong>Objectives of the Business:</strong> Clearly defined goals that the business aims to achieve (e.g., profit targets, market share, social impact).</li>
                         <li><strong>Name of the Business:</strong> The chosen name should be simple, unique, and legally available.</li>
@@ -487,6 +749,16 @@
                     <p class="mb-4 text-lg">This section covers two distinct but important business concepts: franchising, a popular model for business expansion, and e-commerce, which has revolutionized how businesses operate and interact with customers globally.</p>
                     <h3 class="text-xl font-semibold text-orange-600 mb-2">Franchising: A Business Expansion Model</h3>
                     <p class="mb-3">Franchising is a business arrangement where a "franchisor" (the original business owner) grants rights to a "franchisee" (an independent business person) to sell/offer products or services using the franchisor's established trademark, name, systems, methods, and even packaging materials. In return, the franchisee pays a fee or royalty to the franchisor.</p>
+                    <div class="diagram-container my-4">
+                        <div class="diagram-box">Franchisor (Grants Rights)</div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-box">Franchisee (Pays Fee/Royalty)</div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-box">Operates Business under Franchisor's Brand</div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Simplified input-output model of the Franchising relationship.</p>
                     <button class="toggle-button bg-orange-200 text-orange-800 px-3 py-1 rounded-md mb-1 text-sm">Advantages</button>
                     <ul class="list-disc list-inside ml-4 mb-3 space-y-1 hidden">
                         <li><strong>For the Franchisor:</strong> Gains a large fee and expands brand presence without significant capital outlay.</li>
@@ -552,6 +824,56 @@
                         <li><strong>Minimize Operational Cost:</strong> Can lead to economies of scale and reduced overheads by combining operations.</li>
                         <li><strong>Reduce Competition:</strong> By acquiring a competitor, a company can reduce market rivalry and gain a stronger market position.</li>
                     </ul>
+                    <h4 class="text-lg font-medium text-orange-500 my-2">Comparison of Business Collaborations</h4>
+                    <table class="diagram-table">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Joint Venture</th>
+                                <th>Strategic Alliance</th>
+                                <th>Merger</th>
+                                <th>Acquisition</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>New Entity Formed?</td>
+                                <td>Yes (for specific project)</td>
+                                <td>No</td>
+                                <td>Yes (new combined entity)</td>
+                                <td>No (acquiring company remains)</td>
+                            </tr>
+                            <tr>
+                                <td>Degree of Integration</td>
+                                <td>High (shared operations for JV)</td>
+                                <td>Low to Medium (collaboration, not full integration)</td>
+                                <td>Very High (full integration)</td>
+                                <td>High (target integrated into acquirer)</td>
+                            </tr>
+                            <tr>
+                                <td>Ownership Change</td>
+                                <td>Shared ownership of JV</td>
+                                <td>No change in individual ownership</td>
+                                <td>Complete change, new ownership structure</td>
+                                <td>Target company ownership shifts to acquirer</td>
+                            </tr>
+                            <tr>
+                                <td>Risk Sharing</td>
+                                <td>Shared</td>
+                                <td>Shared (limited to collaboration)</td>
+                                <td>Shared (new entity)</td>
+                                <td>Acquirer bears most risk</td>
+                            </tr>
+                            <tr>
+                                <td>Purpose</td>
+                                <td>Specific project/opportunity</td>
+                                <td>Mutual benefit, resource pooling</td>
+                                <td>Synergies, market share, reduce competition</td>
+                                <td>Gain control, market share, resources</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="text-sm text-gray-600 mt-2 mb-4">Comparative overview of different business collaboration strategies.</p>
                 `
             },
             {
@@ -573,7 +895,7 @@
                         <li><strong>Balance of Trade:</strong> This is the economic value of a country's total exports minus its total imports over a specific period.
                             <ul class="list-circle list-inside ml-6">
                                 <li><strong>Trade Surplus:</strong> Occurs when a country's exports are greater than its imports.</li>
-                                <li><strong>Trade Deficit:</strong> Occurs when a country's imports are greater than its exports.</li>
+                                <li><strong>Trade Deficit:</strong> Occurs when a country's imports are greater than its imports.</li>
                             </ul>
                         </li>
                         <li><strong>National Debt:</strong> This refers to the total amount of money that a government owes to its creditors, both domestic and foreign.</li>
@@ -584,9 +906,36 @@
                             </ul>
                         </li>
                     </ul>
+                    <h4 class="text-lg font-medium text-orange-500 my-2">Balance of Payment: Input-Output Model</h4>
+                    <div class="diagram-container my-4">
+                        <div class="diagram-box">Country's Economy</div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-horizontal-group">
+                            <div class="diagram-box text-sm">Receipts (Money In)</div>
+                            <div class="diagram-box text-sm">Payments (Money Out)</div>
+                        </div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-box">Balance of Payment (Net Result)</div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Simplified input-output model for Balance of Payment.</p>
 
                     <h3 class="text-xl font-semibold text-orange-600 mt-6 mb-2">Trade Barriers: Obstacles to Free Trade</h3>
                     <p class="mb-3">Governments sometimes implement policies to restrict international trade, often to protect domestic industries or for political reasons. These are known as trade barriers:</p>
+                    <div class="diagram-container my-4">
+                        <div class="diagram-box">Trade Barriers</div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-grid">
+                            <div class="diagram-box text-sm">Tariffs (Taxes)</div>
+                            <div class="diagram-box text-sm">Quotas (Limits)</div>
+                            <div class="diagram-box text-sm">Subsidies (Support)</div>
+                            <div class="diagram-box text-sm">Social/Cultural</div>
+                            <div class="diagram-box text-sm">Legal/Regulatory</div>
+                            <div class="diagram-box text-sm">Economic Differences</div>
+                            <div class="diagram-box text-sm">Political System</div>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Various types of Trade Barriers.</p>
                     <ul class="list-disc list-inside mb-3 space-y-1">
                         <li><strong>Tariff:</strong> A tax imposed by a government on imported goods. This makes imported goods more expensive, encouraging consumers to buy domestically produced goods.</li>
                         <li><strong>Quota:</strong> A physical limit on the quantity of a specific commodity that can be imported into a country during a given period.</li>
@@ -613,6 +962,19 @@
                     <p class="mb-3">Management is the process of coordinating and integrating work activities efficiently and effectively through other people. It's about achieving organizational goals by making the best use of resources and guiding human effort.</p>
                     <h3 class="text-xl font-semibold text-orange-600 mb-2">Functions of Managers (The Management Process)</h3>
                     <p class="mb-3">Managers perform several key functions that form the management process:</p>
+                    <div class="diagram-container my-4">
+                        <div class="diagram-box">Planning</div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-box">Organizing</div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-box">Directing (Leading)</div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-box">Controlling</div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">The four core functions of the Management Process (Flowchart).</p>
                     <ul class="list-disc list-inside mb-3 space-y-1">
                         <li><strong>Planning:</strong> Determining what needs to be done, when, and how. This involves setting goals and outlining strategies to achieve them.</li>
                         <li><strong>Organizing:</strong> Arranging resources (people, money, materials) and activities into a coherent structure to implement plans. This includes defining roles and responsibilities.</li>
@@ -622,6 +984,16 @@
                     </ul>
                     <h3 class="text-xl font-semibold text-orange-600 mb-2">Types of Managers (Levels of Management)</h3>
                     <p class="mb-3">Managers exist at different levels within an organization, each with distinct responsibilities:</p>
+                    <div class="diagram-container my-4">
+                        <div class="diagram-box">Levels of Management</div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-grid">
+                            <div class="diagram-box text-sm">Top Managers</div>
+                            <div class="diagram-box text-sm">Middle Managers</div>
+                            <div class="diagram-box text-sm">First-line Managers</div>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Hierarchy of Management Levels.</p>
                     <ul class="list-disc list-inside mb-3 space-y-1">
                         <li><strong>Top Managers:</strong> These are senior executives (e.g., CEO, President). They are responsible for the overall performance of the organization, setting strategic goals, and making long-range plans.</li>
                         <li><strong>Middle Managers:</strong> (e.g., Department Head, Regional Manager). They implement the strategies, policies, and decisions formulated by top management, and supervise first-line managers.</li>
@@ -629,15 +1001,20 @@
                     </ul>
                     <h3 class="text-xl font-semibold text-orange-600 mb-2">Areas of Management</h3>
                     <p class="mb-3">Managers specialize in various functional areas within a business:</p>
-                    <ul class="list-disc list-inside mb-3 space-y-1">
-                        <li>Human Resources Management</li>
-                        <li>Operations Management (Production)</li>
-                        <li>Marketing Management</li>
-                        <li>Information Management</li>
-                        <li>Financial Management</li>
-                        <li>Public Relations Management</li>
-                        <li>Research & Development Management</li>
-                    </ul>
+                    <div class="diagram-container my-4">
+                        <div class="diagram-box">Areas of Management</div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-grid">
+                            <div class="diagram-box text-sm">Human Resources</div>
+                            <div class="diagram-box text-sm">Operations</div>
+                            <div class="diagram-box text-sm">Marketing</div>
+                            <div class="diagram-box text-sm">Information</div>
+                            <div class="diagram-box text-sm">Financial</div>
+                            <div class="diagram-box text-sm">Public Relations</div>
+                            <div class="diagram-box text-sm">Research & Development</div>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Various functional areas where management is applied.</p>
                     <h3 class="text-xl font-semibold text-orange-600 mb-2">Basic Management Skills</h3>
                     <ul class="list-disc list-inside mb-3 space-y-1">
                         <li><strong>Technical Skills:</strong> The ability to perform a specialized task requiring specific knowledge or expertise (e.g., engineering, accounting).</li>
@@ -660,6 +1037,39 @@
                     <p class="mb-4 text-lg">Human Resource Management is crucial for any organization, starting with understanding job roles and then finding the right people to fill them. This section delves into job analysis and the various methods of recruiting human resources.</p>
                     <h3 class="text-xl font-semibold text-orange-600 mb-2">Job Analysis: Understanding the Role</h3>
                     <p class="mb-3">Job analysis is a systematic process used to collect all relevant information related to a specific job. It helps in defining what a job entails and what qualities a person needs to perform it successfully. It typically results in two key documents:</p>
+                    <h4 class="text-lg font-medium text-orange-500 my-2">Comparison: Job Description vs. Job Specification</h4>
+                    <table class="diagram-table">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Job Description</th>
+                                <th>Job Specification</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Focus</td>
+                                <td>The Job (Tasks, Duties)</td>
+                                <td>The Person (Skills, Qualifications)</td>
+                            </tr>
+                            <tr>
+                                <td>Content</td>
+                                <td>Job title, location, duties, working environment, supervision.</td>
+                                <td>Human skills, qualifications, experience, special skills, attitude.</td>
+                            </tr>
+                            <tr>
+                                <td>Answers</td>
+                                <td>"What is this job?"</td>
+                                <td>"Who is suitable for this job?"</td>
+                            </tr>
+                            <tr>
+                                <td>Purpose</td>
+                                <td>Defines the job, used for performance evaluation.</td>
+                                <td>Defines candidate requirements, used for recruitment & selection.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="text-sm text-gray-600 mt-2 mb-4">Comparative overview of Job Description and Job Specification.</p>
                     <ul class="list-disc list-inside mb-3 space-y-1">
                         <li><strong>Job Description:</strong> This document outlines the duties, responsibilities, working conditions, and reporting relationships of a specific job. It covers:
                             <ul class="list-circle list-inside ml-6">
@@ -689,6 +1099,19 @@
                     <p class="mb-3">This involves considering current employees for open positions. It can boost morale and leverage existing knowledge of the company culture.</p>
                     <h4 class="text-lg font-medium text-orange-500 my-2">External Recruiting</h4>
                     <p class="mb-3">This involves attracting people from outside the organization. Common sources include:</p>
+                    <div class="diagram-container my-4">
+                        <div class="diagram-box">External Recruiting Sources</div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-grid">
+                            <div class="diagram-box text-sm">Informal Search (References)</div>
+                            <div class="diagram-box text-sm">Job Posting (Notices)</div>
+                            <div class="diagram-box text-sm">Educational Institutions</div>
+                            <div class="diagram-box text-sm">Professional Associations</div>
+                            <div class="diagram-box text-sm">Recruitment Agencies</div>
+                            <div class="diagram-box text-sm">Advertisement (Media)</div>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Various external sources for recruiting human resources.</p>
                     <ul class="list-disc list-inside ml-4 mb-3 space-y-1">
                         <li><strong>Informal Search (References):</strong> Relying on recommendations from current employees or professional networks.</li>
                         <li><strong>Job Posting (Notices):</strong> Advertising vacancies on company bulletin boards or internal communication channels.</li>
@@ -706,6 +1129,19 @@
                     <p class="mb-4 text-lg">The Cost-Of-Living Adjustment (COLA) is an important concept primarily found in labor contracts, designed to protect employees' purchasing power against inflation. It's a key element within the broader context of compensation and collective bargaining.</p>
                     <h3 class="text-xl font-semibold text-orange-600 mb-2">Definition of COLA</h3>
                     <p class="mb-3">A COLA is a clause often included in labor contracts (agreements between management and labor unions) that ties future wage raises to changes in consumer purchasing power. Essentially, it's an automatic increase in wages or benefits to account for inflation, ensuring that the real value of earnings does not decrease over time.</p>
+                    <div class="diagram-container my-4">
+                        <div class="diagram-box">Inflation Increases</div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-box">COLA Clause Triggered</div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-box">Wage/Benefit Adjustment</div>
+                        <div class="diagram-arrow"></div>
+                        <div class="diagram-connector"></div>
+                        <div class="diagram-box">Maintain Purchasing Power</div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Flowchart illustrating the function of a Cost-Of-Living Adjustment (COLA).</p>
                     <p class="mb-3"><strong>Context:</strong> COLA is a part of <strong>Compensation</strong> strategies and is typically negotiated during <strong>Collective Bargaining</strong>, which is the process where labor unions and management negotiate terms and conditions of employment, including wages, benefits, and working conditions.</p>
                     <p class="mb-3">The purpose of COLA is to maintain the standard of living for employees by adjusting their income in response to increases in the cost of living, usually measured by consumer price indices.</p>
                 `
