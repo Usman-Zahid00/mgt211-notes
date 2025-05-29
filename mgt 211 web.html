@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive MGT211 Concepts Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Visualization & Content Choices: 
+        - Concept of Business: Goal: Inform. Method: Structured text (headings, lists, paragraphs). Interaction: Read-only. Justification: Basic definitions and characteristics are best presented textually.
+        - Sole Proprietorship & Partnership: Goal: Compare & Inform. Method: Structured text, toggleable lists for Advantages/Disadvantages. Interaction: Click to expand/collapse lists. Justification: Manages lengthy lists and allows focused comparison.
+        - Types of Industry: Goal: Organize & Inform. Method: Hierarchical list structure (HTML <ul>/<li> or styled divs). Interaction: Read-only. Justification: Clearly presents categorical information.
+        - Product Life Cycle: Goal: Illustrate a dynamic concept. Method: Line chart (Chart.js on Canvas) showing stages. Interaction: Hover for tooltips (default Chart.js). Justification: Visually represents the progression and is more engaging than text alone.
+        - Other textual concepts (e.g., Trade, Joint Stock Co., Marketing): Goal: Inform. Method: Structured text, toggleable sections for detailed lists. Interaction: Navigation selection, content toggles. Justification: Standardized presentation for textual information, ensuring consistency and usability.
+        - Diagrams (e.g., Business Components from PDF p4): Goal: Illustrate structure. Method: Recreated using HTML divs and Tailwind CSS for simple block diagrams. Interaction: Read-only. Justification: Provides a visual representation of relationships as in the source, without using SVG.
+    -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .nav-link {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .nav-link.active {
+            background-color: #F97316; /* orange-500 */
+            color: white;
+        }
+        .nav-link:hover {
+            background-color: #FB923C; /* orange-400 */
+            color: white;
+        }
+        .content-section {
+            display: none; /* Hidden by default, shown by JS */
+        }
+        .content-section.active {
+            display: block;
+        }
+        .toggle-button::after {
+            content: ' ▼';
+            font-size: 0.8em;
+        }
+        .toggle-button.expanded::after {
+            content: ' ▲';
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px; /* Max width for larger screens */
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px; /* Base height */
+            max-height: 400px; /* Max height */
+        }
+        @media (min-width: 768px) { /* md breakpoint */
+            .chart-container {
+                height: 350px;
+            }
+        }
+         /* Basic diagram styling */
+        .diagram-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid #FDBA74; /* orange-300 */
+            border-radius: 0.5rem;
+            background-color: #FFF7ED; /* orange-50 */
+            margin-bottom: 1rem;
+        }
+        .diagram-box {
+            background-color: #FED7AA; /* orange-200 */
+            color: #7C2D12; /* orange-900 */
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            margin: 0.5rem;
+            text-align: center;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        .diagram-connector {
+            width: 1px;
+            background-color: #F97316; /* orange-500 */
+            margin: 0.25rem 0;
+        }
+        .diagram-horizontal-group {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="bg-orange-50 text-stone-800">
+
+    <header class="bg-orange-600 text-white p-6 shadow-md">
+        <h1 class="text-3xl font-bold text-center">Interactive MGT211 Concepts Explorer</h1>
+    </header>
+
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <nav id="sidebarNav" class="md:w-1/4 bg-orange-100 p-4 space-y-2 shadow-lg md:min-h-screen md:sticky md:top-0 overflow-y-auto">
+            <button id="mobileMenuButton" class="md:hidden bg-orange-500 text-white p-2 rounded-md w-full mb-2">Menu</button>
+            <div id="navListContainer" class="hidden md:block">
+                </div>
+        </nav>
+
+        <main id="mainContent" class="md:w-3/4 p-6 space-y-6">
+            <div id="welcomeMessage" class="bg-white p-8 rounded-lg shadow-lg text-center">
+                <h2 class="text-2xl font-semibold text-orange-600 mb-4">Welcome to the MGT211 Concepts Explorer!</h2>
+                <p class="text-lg">Select a concept from the navigation menu to begin your exploration of key business topics from the MGT211 handouts. This interactive guide is designed to help you understand and synthesize the material effectively.</p>
+            </div>
+            </main>
+    </div>
+
+    <footer class="bg-orange-600 text-white p-4 text-center mt-auto">
+        <p>&copy; 2024 MGT211 Concepts Explorer. All rights reserved (for educational purposes).</p>
+    </footer>
+
+    <script>
+        const conceptsData = [
+            {
+                id: "concept-of-business",
+                title: "1. Concept of Business (Lecture 1)",
+                content: `
+                    <p class="mb-4 text-lg">This section introduces the fundamental concept of business, its defining characteristics, and its inherent nature as an economic and social activity. Understanding these basics is crucial for grasping more complex business topics.</p>
+                    <h3 class="text-xl font-semibold text-orange-600 mb-2">Definition</h3>
+                    <p class="mb-3">At its core, a "business" is any human activity that aims to earn money. This usually involves the regular production or exchange of goods and services with the goal of mutual gain or profit. Think of it as an organized institution that provides goods and services to society, driven by the desire for private gain.</p>
+                    
+                    <div class="diagram-container my-4">
+                        <div class="diagram-box">Business</div>
+                        <div style="display: flex; justify-content: space-around; width: 100%;">
+                            <div class="diagram-connector" style="height: 20px; transform: rotate(45deg) translateX(-10px) translateY(5px);"></div>
+                            <div class="diagram-connector" style="height: 20px; transform: rotate(-45deg) translateX(10px) translateY(5px);"></div>
+                        </div>
+                        <div class="diagram-horizontal-group">
+                            <div class="diagram-box">Buying and Selling</div>
+                            <div class="diagram-box">Buying and Selling</div>
+                        </div>
+                         <div style="display: flex; justify-content: space-around; width: 100%;">
+                            <div class="diagram-connector" style="height: 20px; transform: rotate(-45deg) translateX(-10px) translateY(-5px);"></div>
+                            <div class="diagram-connector" style="height: 20px; transform: rotate(45deg) translateX(10px) translateY(-5px);"></div>
+                        </div>
+                        <div class="diagram-box">Wealth</div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Simplified representation of business cycle involving buying/selling and wealth generation (inspired by PDF page 1).</p>
+
+
+                    <h3 class="text-xl font-semibold text-orange-600 mb-2">Characteristics: What makes something a business?</h3>
+                    <ul class="list-disc list-inside mb-3 space-y-1">
+                        <li><strong>Capital:</strong> Money or assets needed to start and run the business.</li>
+                        <li><strong>Creation of Utility:</strong> Businesses make products or services more useful or desirable (e.g., changing raw materials into a finished product).</li>
+                        <li><strong>Dealing in Goods and Services:</strong> The core activity involves either physical products or intangible services.</li>
+                        <li><strong>Employment:</strong> Businesses often create jobs for people.</li>
+                        <li><strong>Islamic Process (Rizq-e-Halal):</strong> In an Islamic context, business activities must be lawful and ethical.</li>
+                        <li><strong>Motive (profit):</strong> The primary goal for most businesses is to make a profit.</li>
+                        <li><strong>Organization:</strong> Businesses require a structured way of operating, with roles and responsibilities.</li>
+                        <li><strong>Production/Purchase of Goods:</strong> Businesses either create products themselves or buy them to sell.</li>
+                        <li><strong>Regular Transaction:</strong> Business activities are not one-off events but occur repeatedly.</li>
+                        <li><strong>Risks and Uncertainty:</strong> There's always a chance of loss or unexpected outcomes.</li>
+                        <li><strong>Sale or Transfer for Value:</strong> Goods or services are exchanged for money or other valuable consideration.</li>
+                        <li><strong>Social Welfare:</strong> While profit-driven, businesses also contribute to society by providing goods, services, and employment.</li>
+                    </ul>
+                    <h3 class="text-xl font-semibold text-orange-600 mb-2">Nature: What kind of activity is business?</h3>
+                    <ul class="list-disc list-inside mb-3 space-y-1">
+                        <li><strong>Economic Activity:</strong> It's about producing, distributing, and consuming wealth.</li>
+                        <li><strong>Human Activity:</strong> It involves people interacting, making decisions, and performing tasks.</li>
+                        <li><strong>Social Process:</strong> Businesses operate within society, affecting and being affected by people and their needs.</li>
+                        <li><strong>System:</strong> It's a complex set of interconnected parts working together to achieve a goal.</li>
+                    </ul>
+                `
+            },
+            {
+                id: "economic-demographic-environment",
+                title: "2. Economic and Demographic Environment (Lecture 2)",
+                content: `
+                    <p class="mb-4 text-lg">Understanding the economic and demographic environments is vital for any business. These external factors significantly influence how businesses operate, what products they offer, and how they reach their customers.</p>
+                    <h3 class="text-xl font-semibold text-orange-600 mb-2">Economic Environment</h3>
+                    <p class="mb-3">This refers to the overall conditions of the economic system in which a business operates. It includes factors like: </p>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1">
+                        <li><strong>Economic Growth:</strong> How much the economy is expanding. This is measured by things like:
+                            <ul class="list-circle list-inside ml-6">
+                                <li>Aggregate Output (total production)</li>
+                                <li>Standard of Living (quality of life based on wealth)</li>
+                                <li>Gross Domestic Product (GDP - total value of goods/services produced within a country)</li>
+                                <li>Gross National Product (GNP - total value of goods/services produced by a country's residents, regardless of location)</li>
+                                <li>Productivity (efficiency in production)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Economic Stability:</strong> A state where the amount of money available and the goods/services produced are growing at roughly the same rate. This stability can be threatened by:
+                            <ul class="list-circle list-inside ml-6">
+                                <li>Inflation (rising prices)</li>
+                                <li>Unemployment (people unable to find jobs)</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <h4 class="text-lg font-medium text-orange-500 my-2">Managing the Economy (Government Policies)</h4>
+                    <p class="mb-3">Governments use different policies to influence the economy:</p>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1">
+                        <li><strong>Fiscal Policies:</strong> These are government decisions about how to collect money (through taxes) and how to spend it (on public services, infrastructure, etc.).</li>
+                        <li><strong>Monetary Policies:</strong> These are government actions that control the amount of money circulating in the economy, often managed by central banks (e.g., setting interest rates).</li>
+                        <li><strong>Stabilization Policy:</strong> The overall goal of these policies is to smooth out ups and downs in the economy (like recessions or booms) and keep prices stable. It combines both fiscal and monetary approaches.</li>
+                    </ul>
+
+                    <h3 class="text-xl font-semibold text-orange-600 mt-6 mb-2">Demographic Environment</h3>
+                    <p class="mb-3">This involves studying the characteristics of a population. These characteristics include:</p>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1">
+                        <li>Population size and growth rate</li>
+                        <li>Distribution by gender and age</li>
+                        <li>Income levels</li>
+                        <li>Education levels</li>
+                        <li>Geographic location</li>
+                        <li>Family structures</li>
+                    </ul>
+                    <p class="mb-3">The demographic environment significantly influences a business by affecting:</p>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1">
+                        <li>The size of demand for products and services.</li>
+                        <li>Customers' buying patterns and preferences.</li>
+                        <li>The availability and types of labor supply (e.g., skilled vs. unskilled workers).</li>
+                        <li>Overall business planning and strategy.</li>
+                    </ul>
+                `
+            },
+            {
+                id: "types-of-industry",
+                title: '3. Types of Industry (Lectures 3-5)',
+                content: `
+                    <p class="mb-4 text-lg">Industry forms a core component of business, focusing on the production and preparation of goods and services. This section breaks down the different classifications of industries, from raw material extraction to service provision, explaining how they transform resources into valuable outputs.</p>
+                    <h3 class="text-xl font-semibold text-orange-600 mb-2">Industry Definition</h3>
+                    <p class="mb-3">An "industry" is generally connected with the production and preparation of goods and services. Its main role is to convert raw materials into finished or semi-finished goods that are ready for use or further processing.</p>
+                    
+                    <div class="diagram-container my-4">
+                        <div class="diagram-box">Industry</div>
+                        <div class="diagram-connector" style="height: 20px;"></div>
+                        <div class="diagram-horizontal-group">
+                            <div class="diagram-box">Primary Industry</div>
+                            <div class="diagram-box">Secondary Industry</div>
+                        </div>
+                        <div style="display: flex; width: 100%; justify-content: space-around;">
+                           <div class="diagram-vertical-group" style="align-items:center; display:flex; flex-direction: column;">
+                             <div class="diagram-connector" style="height: 10px;"></div>
+                             <div class="diagram-box text-sm">Extractive</div>
+                             <div class="diagram-box text-sm">Genetic</div>
+                           </div>
+                           <div class="diagram-vertical-group" style="align-items:center; display:flex; flex-direction: column;">
+                             <div class="diagram-connector" style="height: 10px;"></div>
+                             <div class="diagram-box text-sm">Construction</div>
+                             <div class="diagram-box text-sm">Manufacturing</div>
+                             <div class="diagram-box text-sm">Services</div>
+                           </div>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">Visual breakdown of Industry types (inspired by PDF page 4).</p>
+
+                    <h4 class="text-lg font-medium text-orange-500 my-2">Primary Industry</h4>
+                    <p class="mb-1">These industries are involved in the very first stage of production: obtaining or extracting raw materials directly from nature.</p>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1">
+                        <li><strong>Extractive Industry:</strong> Focuses on extracting natural resources from the earth. Examples include fishing (extracting from water), oil and gas drilling, and coal mining.</li>
+                        <li><strong>Genetic Industry:</strong> Deals with the reproduction and multiplication of living organisms, both animals and plants. Examples include poultry farming, fish farming, and dairy farms.</li>
+                    </ul>
+                    <h4 class="text-lg font-medium text-orange-500 my-2">Secondary Industry</h4>
+                    <p class="mb-1">These industries take the raw materials provided by primary industries and transform them into useful finished or semi-finished goods.</p>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1">
+                        <li><strong>Constructive Industry:</strong> Involved in all kinds of construction activities. This includes building houses, roads, bridges, and other infrastructure.</li>
+                        <li><strong>Manufacturing Industry:</strong> Converts raw materials or semi-finished goods into finished products. Examples are textile mills (turning cotton into fabric) and sugar mills (turning sugarcane into sugar).</li>
+                        <li><strong>Services Industry:</strong> Instead of producing physical goods, this industry provides intangible professional services to individuals and businesses. Examples include lawyers, doctors, teachers, and consultants.</li>
+                    </ul>
+                `
+            },
+            {
+                id: "trade-and-aids",
+                title: "4. Trade and Aids to Trade (Lectures 3-5)",
+                content: `
+                    <p class="mb-4 text-lg">Commerce is the backbone of business, ensuring that goods and services move efficiently from where they are produced to where they are consumed. It encompasses both trade (the actual buying and selling) and the various "aids" that facilitate this process.</p>
+                    <h3 class="text-xl font-semibold text-orange-600 mb-2">Commerce: Trade and its Supporters</h3>
+                    <p class="mb-3">"Commerce" is a broad term that includes all activities, functions, and institutions involved in transferring goods from their point of production to the ultimate consumers. Simply put, it's about "trade and aids to trade."</p>
+
+                    <h4 class="text-lg font-medium text-orange-500 my-2">Trade: The Exchange of Goods</h4>
+                    <p class="mb-1">Trade is the actual procedure of transferring or distributing goods from producers to consumers. It can happen in two main ways:</p>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1">
+                        <li><strong>Home Trade (Internal Trade):</strong> This is the buying and selling of goods within the boundaries of a single country.
+                            <ul class="list-circle list-inside ml-6">
+                                <li><strong>Wholesale Trade:</strong> Involves selling goods in large quantities, typically to other businesses like shopkeepers, who then resell them to consumers.</li>
+                                <li><strong>Retail Trade:</strong> Involves selling goods in smaller quantities directly to the ultimate consumers for their personal use.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Foreign Trade (International Trade):</strong> This involves the exchange of goods and services between two or more different countries.
+                            <ul class="list-circle list-inside ml-6">
+                                <li><strong>Import Trade:</strong> When a country purchases goods or services from another country.</li>
+                                <li><strong>Export Trade:</strong> When a country sells goods or services to another country.</li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <h4 class="text-lg font-medium text-orange-500 my-2">Aids to Trade: Facilitating the Process</h4>
+                    <p class="mb-1">These are activities that help trade flow smoothly, bridging gaps between producers and consumers:</p>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1">
+                        <li><strong>Banking:</strong> Provides financial services like facilitating payments between buyers and sellers, offering loans, and managing funds.</li>
+                        <li><strong>Transportation:</strong> Physically moves goods from where they are produced to where they are needed, overcoming geographical barriers.</li>
+                        <li><strong>Insurance:</strong> Protects against the risk of loss or damage to goods during storage or transit, providing security to businesses.</li>
+                        <li><strong>Warehousing:</strong> Provides facilities for storing manufactured goods until they are needed by consumers, addressing the time gap between production and consumption.</li>
+                        <li><strong>Agents:</strong> Act as intermediaries between buyers and sellers, helping to connect parties and facilitate transactions.</li>
+                        <li><strong>Finance:</strong> Provides the necessary capital for setting up and running industries and businesses, from initial investment to daily operations.</li>
+                        <li><strong>Advertising:</strong> Informs potential customers about goods and services, creating awareness and demand.</li>
+                        <li><strong>Communication:</strong> Facilitates interaction and information exchange among various business stakeholders, including producers, consumers, and intermediaries.</li>
+                    </ul>
+                `
+            },
+            {
+                id: "scope-of-business-organization",
+                title: "5. Scope of Business Organization (Lecture 3)",
+                content: `
+                    <p class="mb-4 text-lg">The "Scope of Business Organization" refers to the different ways businesses can be structured to achieve their objectives effectively. This involves grouping activities and resources in a coherent manner.</p>
+                    <h3 class="text-xl font-semibold text-orange-600 mb-2">Business Organization Definition</h3>
+                    <p class="mb-3">A business organization is essentially the grouping of activities and resources in a way that allows for effective cooperation to achieve specific business objectives. It's about setting up the framework for how a business will operate.</p>
+                    <h3 class="text-xl font-semibold text-orange-600 mb-2">Forms of Business Organization</h3>
+                    <p class="mb-3">There are several common forms that a business organization can take, each with its own legal structure, advantages, and disadvantages:</p>
+                    <ul class="list-disc list-inside mb-3 space-y-1">
+                        <li>Sole Proprietorship</li>
+                        <li>Partnership</li>
+                        <li>Joint Stock Company</li>
+                        <li>Co-operative Societies</li>
+                        <li>Combination (e.g., mergers, acquisitions)</li>
+                    </ul>
+                    <p class="mb-3">These forms vary in terms of ownership, liability, capital requirements, and complexity, and the choice depends on the business's goals and scale.</p>
+                `
+            },
+            {
+                id: "sole-prop-partnership",
+                title: "6. Sole Proprietorship and Partnership (Lectures 3-4)",
+                content: `
+                    <p class="mb-4 text-lg">This section explores two fundamental forms of business organization: sole proprietorship, the simplest individual-owned structure, and partnership, involving two or more individuals. We'll delve into their characteristics, advantages, and disadvantages, as well as the various types of partners and partnerships.</p>
+                    
+                    <h3 class="text-xl font-semibold text-orange-600 mt-4 mb-2">Sole Proprietorship: Business of One</h3>
+                    <p class="mb-3">A sole proprietorship is the simplest and oldest form of business organization. It is owned and controlled by a single individual, who is personally responsible for all aspects of the business.</p>
+                    <button class="toggle-button bg-orange-200 text-orange-800 px-3 py-1 rounded-md mb-1 text-sm">Characteristics</button>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1 hidden">
+                        <li><strong>Easy Formation:</strong> Very simple to start with minimal legal formalities.</li><li><strong>Unlimited Liability:</strong> The owner is personally responsible for all business debts, meaning personal assets can be at risk.</li><li><strong>Single Ownership:</strong> Only one person owns the business.</li><li><strong>Full Profit/Loss:</strong> The owner keeps all profits but also bears all losses.</li><li><strong>Direct Management:</strong> The owner directly manages all operations.</li><li><strong>Easy Dissolution:</strong> Can be closed down easily with few legal hurdles.</li><li><strong>Limited Life:</strong> The business's existence is tied to the owner's life or desire to continue.</li><li><strong>Secrecy:</strong> Business operations and financial details can be kept private.</li>
+                    </ul>
+                    <button class="toggle-button bg-orange-200 text-orange-800 px-3 py-1 rounded-md mb-1 text-sm">Advantages</button>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1 hidden">
+                        <li><strong>Direct contact with customers/workers:</strong> Allows for personalized service and direct feedback.</li><li><strong>Easy Formation/Dissolution:</strong> Minimal paperwork and legal costs.</li><li><strong>Entire Profit/Control:</strong> Owner has full control over decisions and keeps all earnings.</li><li><strong>Flexibility:</strong> Can quickly adapt to market changes.</li><li><strong>Independence:</strong> Owner is their own boss.</li><li><strong>Personal Satisfaction:</strong> Sense of accomplishment from running one's own venture.</li><li><strong>Quick Decisions:</strong> No need to consult with others.</li><li><strong>Tax savings:</strong> Profits are taxed as personal income, avoiding corporate taxes.</li>
+                    </ul>
+                    <button class="toggle-button bg-orange-200 text-orange-800 px-3 py-1 rounded-md mb-1 text-sm">Disadvantages</button>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1 hidden">
+                        <li><strong>Continuity issues:</strong> Business may end if the owner becomes ill, retires, or dies.</li><li><strong>Chances of Fraud (due to poor records):</strong> Less formal oversight can lead to financial irregularities.</li><li><strong>Expansion difficulty:</strong> Limited by the owner's personal capital and time.</li><li><strong>Lack of advertisement:</strong> Often limited budget for marketing.</li><li><strong>Limited Capital:</strong> Relies mainly on the owner's personal funds or limited loans.</li><li><strong>Lack of Inspection/Audit:</strong> Less external scrutiny of finances.</li><li><strong>Lack of Innovation:</strong> May lack diverse perspectives for new ideas.</li><li><strong>Lack of Public Confidence:</strong> Less formal structure can lead to less trust from large clients or investors.</li><li><strong>Management difficulty:</strong> Owner must handle all aspects, which can be overwhelming.</li><li><strong>Much strain on health:</strong> High workload can lead to stress and burnout.</li><li><strong>Not durable:</strong> Business life is often short-lived.</li><li><strong>Risk of careless drawings:</strong> Owner might withdraw too much money, harming the business.</li><li><strong>Unlimited Liability:</strong> Personal assets are not protected from business debts.</li>
+                    </ul>
+
+                    <h3 class="text-xl font-semibold text-orange-600 mt-6 mb-2">Partnership: Business with Shared Responsibility</h3>
+                    <p class="mb-3">A partnership is a lawful business owned by two or more persons who agree to share the profits (and losses) of the business. It's based on an agreement between the partners.</p>
+                    <button class="toggle-button bg-orange-200 text-orange-800 px-3 py-1 rounded-md mb-1 text-sm">Characteristics</button>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1 hidden">
+                        <li><strong>Agreement (written or oral):</strong> The terms of the partnership are defined by an agreement, ideally written (Partnership Deed).</li><li><strong>Agent:</strong> Each partner acts as an agent for the firm and for other partners, meaning their actions can bind the partnership.</li><li><strong>Business (for profit):</strong> The main purpose is to conduct a business and earn profits.</li><li><strong>Cooperation:</strong> Requires mutual understanding and collaboration among partners.</li><li><strong>Dissolution (temporary nature):</strong> A partnership can be dissolved upon the death, retirement, or insolvency of a partner, or by mutual agreement.</li><li><strong>Legal Entity (if registered):</strong> While not a separate legal entity like a company, it gains some legal standing if registered.</li><li><strong>Management participation:</strong> All partners typically have the right to participate in management.</li><li><strong>Number of Partners:</strong> Generally 2-20 persons (2-10 for banking businesses).</li><li><strong>Object (profit):</strong> The aim is to make profits.</li><li><strong>Partnership Act (1932 in Pakistan):</strong> Governed by specific laws.</li><li><strong>Tax (individual):</strong> Profits are usually taxed as individual income for each partner.</li><li><strong>Profit/Loss Distribution:</strong> Profits and losses are shared according to the partnership agreement.</li><li><strong>Registration (desirable):</strong> While not compulsory, registration offers legal benefits.</li><li><strong>Share in Capital:</strong> Partners contribute capital to the business.</li><li><strong>Transfer of Rights (requires consent):</strong> A partner cannot transfer their share without the consent of other partners.</li><li><strong>Unlimited Liability:</strong> Like sole proprietorship, partners are personally liable for business debts.</li>
+                    </ul>
+                    <button class="toggle-button bg-orange-200 text-orange-800 px-3 py-1 rounded-md mb-1 text-sm">Advantages</button>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1 hidden">
+                        <li><strong>Simplicity in Formation/Dissolution:</strong> Relatively easy to set up and close compared to companies.</li><li><strong>Sufficient Capital:</strong> More capital can be pooled than in a sole proprietorship.</li><li><strong>Skilled Workers (can hire):</strong> Can attract and hire more specialized labor.</li><li><strong>Sense of Responsibility:</strong> Partners feel more accountable for the business's success.</li><li><strong>Satisfaction of Partners:</strong> Shared ownership can lead to greater motivation.</li><li><strong>Secrecy (no public accounts):</strong> Financial information is generally not publicly disclosed.</li><li><strong>Social Benefit:</strong> Contributes to employment and economic activity.</li><li><strong>Expansion:</strong> Easier to expand than a sole proprietorship due to more resources and expertise.</li><li><strong>Flexibility:</strong> Can adapt decisions more quickly than larger organizations.</li><li><strong>Tax Facility:</strong> Often simpler tax structure than corporations.</li><li><strong>Prime Credit Standing:</strong> May find it easier to get loans due to combined assets.</li><li><strong>Minority Protection:</strong> Specific clauses can protect minority partners.</li><li><strong>Moral Promotion:</strong> Shared values can foster a strong business culture.</li><li><strong>Distribution of Work:</strong> Tasks can be divided among partners, reducing individual burden.</li><li><strong>Combined Abilities:</strong> Benefits from diverse skills and experiences of multiple partners.</li><li><strong>Absence of Fraud:</strong> Multiple partners provide checks and balances.</li>
+                    </ul>
+                    <button class="toggle-button bg-orange-200 text-orange-800 px-3 py-1 rounded-md mb-1 text-sm">Disadvantages</button>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1 hidden">
+                        <li><strong>Unlimited Liability:</strong> Partners are personally liable for all business debts.</li><li><strong>Limited Life:</strong> The partnership can dissolve upon the exit of a partner.</li><li><strong>Limited Capital:</strong> Still limited compared to large corporations.</li><li><strong>Limited Abilities:</strong> May not be able to afford or attract top-tier experts.</li><li><strong>Limited Number of Partners:</strong> Restrictions on how many partners can join.</li><li><strong>Legal Defects:</strong> Less legal protection and regulation compared to companies.</li><li><strong>Lack of Interest:</strong> A partner with a smaller share might lose interest.</li><li><strong>Lack of Public Confidence:</strong> May be perceived as less stable than a company.</li><li><strong>Lack of Prompt Decision:</strong> Decisions might be delayed if partners disagree.</li><li><strong>Lack of Secrecy (disputes):</strong> Internal disputes can lead to public disclosure of sensitive information.</li><li><strong>Chances of Dispute:</strong> Disagreements among partners are common.</li><li><strong>Expansion Problem:</strong> Still faces challenges in scaling up significantly.</li><li><strong>Frozen Investment:</strong> Difficult to withdraw capital quickly.</li><li><strong>Risk of Loss:</strong> Partners share all losses.</li><li><strong>Transfer of Rights (restricted):</strong> Selling one's share is not straightforward.</li>
+                    </ul>
+                    <button class="toggle-button bg-orange-200 text-orange-800 px-3 py-1 rounded-md mb-1 text-sm">Kinds of Partners</button>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1 hidden">
+                        <li><strong>Active Partner:</strong> Actively participates in management.</li><li><strong>Secret Partner:</strong> Participates in management but is not known to the public.</li><li><strong>Sleeping Partner:</strong> Contributes capital and shares profits/losses but does not participate in management.</li><li><strong>Silent Partner:</strong> Does not participate in management but is known to the public.</li><li><strong>Senior Partner:</strong> Has more experience or a larger share.</li><li><strong>Sub-Partner:</strong> Shares profits with a partner, but not directly with the firm.</li><li><strong>Junior Partner:</strong> Less experience or smaller share.</li><li><strong>Major Partner:</strong> Has a larger share or more influence.</li><li><strong>Minor Partner:</strong> A person below 18 years, can only be admitted for benefits.</li><li><strong>Nominal Partner:</strong> Lends their name to the firm but has no real interest or liability.</li><li><strong>Deceased Partner:</strong> A partner who has passed away.</li><li><strong>Limited Partner:</strong> Liability is limited to their capital contribution (in a Limited Partnership).</li><li><strong>Unlimited Partner:</strong> Has unlimited liability (in a General Partnership).</li><li><strong>Incoming Partner:</strong> A new partner joining the firm.</li><li><strong>Retired Partner:</strong> A partner who has left the firm.</li><li><strong>Partner in Profits only:</strong> Shares profits but not losses.</li><li><strong>Quasi Partner:</strong> Acts like a partner but isn't legally one.</li><li><strong>Partner by Estoppel:</strong> Appears to be a partner to outsiders due to their actions, even if not formally one.</li>
+                    </ul>
+                     <button class="toggle-button bg-orange-200 text-orange-800 px-3 py-1 rounded-md mb-1 text-sm">Kinds of Partnership</button>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1 hidden">
+                        <li><strong>Partnership at Will:</strong> Formed for an indefinite period, can be dissolved by any partner at any time.</li><li><strong>Particular Partnership:</strong> Formed for a specific venture or period.</li><li><strong>Limited Partnership:</strong> Has at least one general partner with unlimited liability and one or more limited partners with liability limited to their investment.</li>
+                    </ul>
+                     <h4 class="text-lg font-medium text-orange-500 my-2">Partnership Deed</h4>
+                     <p class="mb-3">The Partnership Deed is a crucial document (preferably written) that outlines the terms and conditions of the partnership. It typically includes details like the firm's name, capital contributions, profit and loss distribution ratios, duties of partners, and provisions for arbitration in case of disputes.</p>
+                `
+            },
+            {
+                id: "joint-stock-company",
+                title: "7. Joint Stock Company (Lectures 3, 5-6)",
+                content: `
+                    <p class="mb-4 text-lg">The Joint Stock Company is a powerful form of business organization, distinct from sole proprietorships and partnerships due to its legal structure, ability to raise large capital, and limited liability for its owners (shareholders). It's a complex but highly effective structure for large-scale operations.</p>
+                    <h3 class="text-xl font-semibold text-orange-600 mb-2">Definition</h3>
+                    <p class="mb-3">A Joint Stock Company is a voluntary association of persons created by law for commercial purposes. A key feature is its "separate legal entity," meaning it exists independently of its owners (shareholders) and can enter into contracts, own property, and be sued in its own name.</p>
+                    <h3 class="text-xl font-semibold text-orange-600 mb-2">Features</h3>
+                    <ul class="list-disc list-inside mb-3 space-y-1">
+                        <li><strong>Creation of Law:</strong> It comes into existence through a legal process (registration).</li>
+                        <li><strong>Capital Borrowing:</strong> Can raise large amounts of capital by issuing shares and debentures to the public.</li>
+                        <li><strong>Separate Legal Entity:</strong> Has its own legal identity, distinct from its members.</li>
+                        <li><strong>Legal Person:</strong> Can act as a person in legal matters (e.g., sue or be sued).</li>
+                        <li><strong>Long Life:</strong> Its existence is not affected by the death, insolvency, or retirement of its members.</li>
+                        <li><strong>Limited Liability:</strong> Shareholders' liability is limited to the amount they have invested in the company (the face value of their shares).</li>
+                        <li><strong>Large Scale Business:</strong> Suited for large-scale operations due to its ability to raise significant capital.</li>
+                        <li><strong>Management by Board of Directors:</strong> Managed by a board elected by shareholders, not by individual owners.</li>
+                        <li><strong>Number of Members:</strong> For a Private Limited Company: 2-50 members. For a Public Limited Company: minimum 7 members, no maximum.</li>
+                        <li><strong>Transferability of Shares:</strong> Shares can be easily bought and sold (especially in public companies).</li>
+                        <li><strong>Trade Agreement:</strong> Can enter into trade agreements in its own name.</li>
+                        <li><strong>Purchases and Sale of Property:</strong> Can own and sell property in its own name.</li>
+                        <li><strong>Payment of Taxes (double):</strong> Company profits are taxed, and then dividends distributed to shareholders are also taxed (double taxation).</li>
+                        <li><strong>Object (profit):</strong> The primary goal is to earn profits for its shareholders.</li>
+                        <li><strong>Government Control:</strong> Subject to various government regulations and oversight.</li>
+                        <li><strong>Easy Mode of Investment:</strong> Investing in shares is relatively easy for the public.</li>
+                        <li><strong>Common Seal:</strong> Acts as the official signature of the company.</li>
+                    </ul>
+                    <button class="toggle-button bg-orange-200 text-orange-800 px-3 py-1 rounded-md mb-1 text-sm">Advantages</button>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1 hidden">
+                        <li><strong>Expansion of Business:</strong> Ability to raise large capital facilitates significant growth.</li><li><strong>Easy Access to Credit:</strong> Often viewed as more creditworthy by banks.</li><li><strong>Easy to Exit:</strong> Shareholders can sell their shares relatively easily.</li><li><strong>Experts’ Services:</strong> Can afford to hire highly skilled professionals for management.</li><li><strong>Employment:</strong> Creates numerous job opportunities.</li><li><strong>Flexibility:</strong> Can adapt to changing market conditions.</li><li><strong>Limited Liability:</strong> Protects shareholders' personal assets.</li><li><strong>Large Scale Production:</strong> Enables efficient production on a massive scale.</li><li><strong>Larger Capital:</strong> Can accumulate substantial funds for big projects.</li><li><strong>Long Life:</strong> Perpetual existence, not affected by changes in ownership.</li><li><strong>Long-term Projects:</strong> Suitable for ventures requiring extensive time and investment.</li><li><strong>Spread of Risk:</strong> Risk is distributed among many shareholders.</li><li><strong>Transfer of Shares:</strong> Easy liquidity for investors.</li><li><strong>Increase in Saving and Investment:</strong> Encourages public investment.</li><li><strong>Better Management:</strong> Professional management leads to efficient operations.</li><li><strong>Beneficial Advices:</strong> Benefits from diverse expertise on the board.</li><li><strong>Public Confidence:</strong> Higher transparency and regulation build trust.</li><li><strong>Higher Profits:</strong> Potential for significant returns due to scale and efficiency.</li>
+                    </ul>
+                    <button class="toggle-button bg-orange-200 text-orange-800 px-3 py-1 rounded-md mb-1 text-sm">Disadvantages</button>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1 hidden">
+                        <li><strong>Initial Difficulties:</strong> Complex and time-consuming formation process.</li><li><strong>Lack of Interest (by shareholders):</strong> Many shareholders are passive and don't actively participate.</li><li><strong>Labor Disputes:</strong> Large workforce can lead to industrial relations issues.</li><li><strong>Lack of Responsibility:</strong> Management may not feel direct accountability to individual shareholders.</li><li><strong>Lack of Secrecy:</strong> Financial information is publicly disclosed.</li><li><strong>Lack of Freedom:</strong> Subject to strict legal regulations.</li><li><strong>Monopoly:</strong> Large companies can dominate markets, reducing competition.</li><li><strong>Speculation:</strong> Share trading can lead to speculative activities.</li><li><strong>Corruption:</strong> Potential for misconduct in large organizations.</li><li><strong>Complicated Process:</strong> Ongoing compliance with legal and regulatory requirements.</li><li><strong>Centralization of Power:</strong> Power often concentrated in the hands of a few directors.</li><li><strong>Double Taxes:</strong> Profits taxed at company level and then again at shareholder level.</li><li><strong>Exploitation:</strong> Potential for exploitation of labor or consumers.</li><li><strong>Problem of Large-Scale Production:</strong> Can lead to inefficiencies if not managed well.</li><li><strong>Nepotism:</strong> Favoritism in hiring or promotions.</li><li><strong>Late Decision:</strong> Decision-making can be slow due to bureaucracy.</li>
+                    </ul>
+                    <h4 class="text-lg font-medium text-orange-500 my-2">Formation Procedure</h4>
+                    <p class="mb-3">Forming a Joint Stock Company involves several distinct stages:</p>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1">
+                        <li><strong>Promotion Stage:</strong> This is the initial phase where the idea for the business is conceived, investigated for feasibility, and necessary factors (like resources, financial sources) are assembled. Essential documents like the Memorandum of Association, Articles of Association, and Prospectus are prepared.</li>
+                        <li><strong>Incorporation Stage:</strong> This involves filing all required documents with the Registrar of Companies and paying the registration fee. Upon satisfaction, the Registrar issues a Certificate of Incorporation, officially bringing the company into existence.</li>
+                        <li><strong>Capital Subscription Stage:</strong> After incorporation, the company raises capital by inviting the public to subscribe to its shares, debentures, or other securities.</li>
+                        <li><strong>Certificate of Commencement:</strong> For public companies, this certificate is required before they can start business operations. It is issued after the company has issued a prospectus, allotted shares, and received the minimum subscription amount.</li>
+                    </ul>
+                    <h4 class="text-lg font-medium text-orange-500 my-2">Types: Public vs. Private Limited Company</h4>
+                    <p class="mb-3">Joint Stock Companies are primarily divided into two types, with key differences:</p>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1">
+                        <li><strong>Public Limited Company:</strong> Can offer shares to the general public, has a minimum of 7 members (no maximum), and shares are freely transferable. Subject to more stringent regulations.</li>
+                        <li><strong>Private Limited Company:</strong> Shares cannot be offered to the public, has 2-50 members, and share transfer is restricted. Generally has fewer regulatory requirements.</li>
+                    </ul>
+                `
+            },
+            {
+                id: "cooperative-society",
+                title: "8. Cooperative Society (Lecture 8)",
+                content: `
+                    <p class="mb-4 text-lg">A Cooperative Society is a unique form of organization driven by the principle of "self-help through mutual help." Unlike profit-driven businesses, its primary aim is to protect and promote the economic interests of its members, often those with limited means.</p>
+                    <h3 class="text-xl font-semibold text-orange-600 mb-2">Definition</h3>
+                    <p class="mb-3">A Cooperative Society is formed by people of limited financial means who come together to help each other, aiming to protect the economically weaker sections of society. Its core motto is "self-help, not competition."</p>
+                    <button class="toggle-button bg-orange-200 text-orange-800 px-3 py-1 rounded-md mb-1 text-sm">Advantages</button>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1 hidden">
+                        <li><strong>Advantage for Farmers:</strong> Often helps farmers by providing resources, marketing support, or fair prices for their produce.</li><li><strong>Easy Formation:</strong> Relatively simple to establish with fewer legal formalities compared to companies.</li><li><strong>Equal Rights:</strong> Each member typically has one vote, regardless of their shareholding, promoting democratic control.</li><li><strong>Equal Distribution of Wealth:</strong> Profits are often distributed based on member participation rather than capital contributed, promoting equity.</li><li><strong>Economic Democracy:</strong> Members have a say in decision-making.</li><li><strong>Elimination of Middlemen:</strong> Can directly connect producers and consumers, reducing costs.</li><li><strong>Financial Assistance:</strong> May receive support or loans from government or other cooperative bodies.</li><li><strong>Friendly Relations:</strong> Fosters a sense of community and mutual support among members.</li><li><strong>Improve Standard of Living:</strong> Helps members improve their economic well-being.</li><li><strong>Increase in Employment:</strong> Can create job opportunities within the community.</li><li><strong>Limited Liability:</strong> Members' liability is usually limited to their share capital.</li><li><strong>Mutual Cooperation:</strong> Operates on the principle of working together for common benefit.</li><li><strong>No Monopoly:</strong> Focus on service rather than market dominance.</li><li><strong>Open Membership:</strong> Generally open to anyone who shares the common interest and can fulfill membership criteria.</li><li><strong>Protection of Mutual Interest:</strong> Designed to safeguard the economic interests of its members.</li><li><strong>Responsibility:</strong> Members share in the responsibility of the society's operations.</li><li><strong>Supply according to Demand:</strong> Can often tailor supply to meet members' specific needs.</li><li><strong>Stable Life:</strong> Can have a relatively stable existence as it's not solely profit-driven.</li><li><strong>Saving in Expenditure:</strong> Members can benefit from bulk purchasing or shared services.</li><li><strong>Tax Concession:</strong> Often receives tax benefits from the government.</li>
+                    </ul>
+                    <button class="toggle-button bg-orange-200 text-orange-800 px-3 py-1 rounded-md mb-1 text-sm">Disadvantages</button>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1 hidden">
+                        <li><strong>Lack of Capital:</strong> Often struggles to raise large amounts of capital due to limited means of members.</li><li><strong>Untrained Supervision:</strong> Management may lack professional training or expertise.</li><li><strong>Defective Organization:</strong> Can suffer from poor organizational structure or planning.</li><li><strong>Illiterate and Ignorant members:</strong> Members may lack business knowledge, leading to poor decisions.</li><li><strong>Lack of Experience:</strong> May not have experienced managers or leaders.</li><li><strong>Lack of Discipline:</strong> Members may not always adhere to rules or decisions.</li><li><strong>Lack of Sincere Management:</strong> Management might not always be fully dedicated or efficient.</li><li><strong>Lack of Profit Incentive:</strong> Focus on service can sometimes reduce motivation for efficiency or innovation.</li><li><strong>Lack of Secrecy:</strong> Operations might be less private.</li><li><strong>Lack of Knowledge:</strong> Members might not have sufficient business acumen.</li><li><strong>Lack of Unity:</strong> Internal conflicts or disagreements can arise.</li><li><strong>No use of New Technology:</strong> May lack resources or willingness to adopt modern technologies.</li><li><strong>No Public Confidence:</strong> May not inspire the same level of trust as large corporations.</li><li><strong>Delay in Decision:</strong> Democratic process can lead to slower decision-making.</li><li><strong>Government Control:</strong> Often subject to government oversight and interference, which can limit autonomy.</li>
+                    </ul>
+                `
+            },
+            {
+                id: "components-of-business-plan",
+                title: "9. Components of Business Plan (Lecture 9)",
+                content: `
+                    <p class="mb-4 text-lg">A Business Plan is a foundational document for any new or growing venture. It serves as a roadmap, outlining objectives, strategies, and how resources will be managed to achieve success. It's crucial for gaining clarity, attracting investment, and guiding operations.</p>
+                    <h3 class="text-xl font-semibold text-orange-600 mb-2">Business Plan Definition</h3>
+                    <p class="mb-3">A Business Plan is a detailed written document that clearly states the objectives of a business and outlines the strategies and methods that will be used to achieve those objectives. It's important for:</p>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1">
+                        <li>Exploiting opportunities effectively.</li>
+                        <li>Determining the necessary resources.</li>
+                        <li>Obtaining those resources (e.g., funding).</li>
+                        <li>Effectively managing the venture.</li>
+                    </ul>
+                    <h3 class="text-xl font-semibold text-orange-600 mb-2">Key Components of a Business Plan</h3>
+                    <p class="mb-3">While plans can vary, most comprehensive business plans include the following essential sections:</p>
+                    <ul class="list-disc list-inside mb-3 space-y-1">
+                        <li><strong>Objectives of the Business:</strong> Clearly defined goals that the business aims to achieve (e.g., profit targets, market share, social impact).</li>
+                        <li><strong>Name of the Business:</strong> The chosen name should be simple, unique, and legally available.</li>
+                        <li><strong>Location of the Business:</strong> Details about where the business will operate, considering factors like accessibility, target market, and operational needs.</li>
+                        <li><strong>Marketing Component:</strong> This section outlines how the business will reach its customers and sell its products/services. It typically covers:
+                            <ul class="list-circle list-inside ml-6">
+                                <li>Target customers (who are you selling to?)</li>
+                                <li>Location strategy (how will products reach customers?)</li>
+                                <li>Pricing strategy (how will products be priced?)</li>
+                                <li>Benefits of the product/service (what value does it offer?)</li>
+                                <li>Product/service type (what exactly is being sold?)</li>
+                                <li>Customer targeting basis (demographics, psychographics, etc.)</li>
+                                <li>Competitor analysis (who are the rivals and what are their strengths/weaknesses?)</li>
+                                <li>Promotional activities (how will the business be advertised and promoted?)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Financial Analysis:</strong> This is a critical section that details the financial aspects of the business, including:
+                            <ul class="list-circle list-inside ml-6">
+                                <li>Required investment (how much money is needed to start and operate?)</li>
+                                <li>Borrowed capital (if any, from where and on what terms?)</li>
+                                <li>Expected revenues (how much money is projected to come in?)</li>
+                                <li>Expenses (what are the anticipated costs?)</li>
+                                <li>Net income (projected profit)</li>
+                                <li>Feasibility (is the business financially viable?)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Administrative Rights & Provisions:</strong> Describes the organizational structure, management team, legal provisions, and how the business will be governed and operated from an administrative perspective.</li>
+                    </ul>
+                `
+            },
+            {
+                id: "franchising-e-commerce",
+                title: "10. Advantages and Disadvantages of Franchising, E-commerce (Lecture 10)",
+                content: `
+                    <p class="mb-4 text-lg">This section covers two distinct but important business concepts: franchising, a popular model for business expansion, and e-commerce, which has revolutionized how businesses operate and interact with customers globally.</p>
+                    <h3 class="text-xl font-semibold text-orange-600 mb-2">Franchising: A Business Expansion Model</h3>
+                    <p class="mb-3">Franchising is a business arrangement where a "franchisor" (the original business owner) grants rights to a "franchisee" (an independent business person) to sell/offer products or services using the franchisor's established trademark, name, systems, methods, and even packaging materials. In return, the franchisee pays a fee or royalty to the franchisor.</p>
+                    <button class="toggle-button bg-orange-200 text-orange-800 px-3 py-1 rounded-md mb-1 text-sm">Advantages</button>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1 hidden">
+                        <li><strong>For the Franchisor:</strong> Gains a large fee and expands brand presence without significant capital outlay.</li>
+                        <li><strong>For the Franchisee:</strong> Gets access to a big, recognized business with a proven model, reducing the risk of failure.</li>
+                        <li><strong>Lower Failure Rate:</strong> Franchised businesses typically have a lower failure rate compared to new, independent ventures because they operate under a tested brand and established procedures.</li>
+                        <li><strong>Franchisor Guidance/Support:</strong> Franchisees often receive training, marketing support, and ongoing operational guidance from the franchisor.</li>
+                        <li><strong>Choice of Location:</strong> Franchisees often have some input or choice in selecting their business location, within the franchisor's guidelines.</li>
+                    </ul>
+                    <button class="toggle-button bg-orange-200 text-orange-800 px-3 py-1 rounded-md mb-1 text-sm">Disadvantages</button>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1 hidden">
+                        <li><strong>High Cost:</strong> Franchisees typically pay a substantial initial franchise fee and ongoing royalties.</li>
+                        <li><strong>Proportionate Profit Given to Franchisor:</strong> A portion of the franchisee's profits must be shared with the franchisor.</li>
+                        <li><strong>Too Many Restrictions from Franchisor:</strong> Franchisees must adhere strictly to the franchisor's operational guidelines, limiting their independence and creativity.</li>
+                    </ul>
+
+                    <h3 class="text-xl font-semibold text-orange-600 mt-6 mb-2">E-commerce (Electronic Commerce): Business in the Digital Age</h3>
+                    <p class="mb-3">E-commerce refers to business transactions conducted over the internet, essentially online commerce versus traditional real-world commerce. It has transformed how businesses operate and interact with customers.</p>
+                    <p class="mb-3">Key aspects of e-commerce include:</p>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1">
+                        <li>Online retail (shopping websites)</li>
+                        <li>Online banking and financial services</li>
+                        <li>Online stock trading</li>
+                        <li>Online auctions (e.g., eBay)</li>
+                        <li>Online airline and travel booking</li>
+                    </ul>
+                    <p class="mb-3">E-commerce allows businesses to:</p>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1">
+                        <li>Reach a much wider audience globally.</li>
+                        <li>Operate 24/7 without geographical limitations.</li>
+                        <li>Provide services and sell products directly to consumers online, often with reduced overhead costs.</li>
+                    </ul>
+                `
+            },
+            {
+                id: "joint-venture-strategic-alliance-m-a",
+                title: "11. Joint Venture, Strategic Alliance, Merger and Acquisition (Lecture 11)",
+                content: `
+                    <p class="mb-4 text-lg">Businesses often collaborate or combine to achieve strategic goals, gain competitive advantages, or enter new markets. This section explores different forms of such collaborations: Joint Ventures, Strategic Alliances, Mergers, and Acquisitions.</p>
+                    <h3 class="text-xl font-semibold text-orange-600 mb-2">Joint Venture</h3>
+                    <p class="mb-3">A Joint Venture (JV) occurs when two or more people or organizations combine their resources (like capital, expertise, or technology) to undertake a specific business project or activity. They share the capital investment, financial burden, risks, and profits. JVs are often formed to exploit new opportunities that would be too large or risky for one entity alone.</p>
+                    <button class="toggle-button bg-orange-200 text-orange-800 px-3 py-1 rounded-md mb-1 text-sm">Advantages of Joint Ventures</button>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1 hidden">
+                        <li><strong>Acquire New Expertise:</strong> Gain access to specialized knowledge or skills from the partner.</li>
+                        <li><strong>Enter New Geographic Markets:</strong> A local partner can provide insights and access to a foreign market.</li>
+                        <li><strong>Gain New Technological Knowledge:</strong> Share R&D and technological advancements.</li>
+                        <li><strong>Sharing Specialized Staff/Technology:</strong> Efficiently utilize unique resources.</li>
+                        <li><strong>Sharing Risks:</strong> Financial and operational risks are distributed among partners.</li>
+                    </ul>
+
+                    <h3 class="text-xl font-semibold text-orange-600 mt-6 mb-2">Strategic Alliance</h3>
+                    <p class="mb-3">A Strategic Alliance is a less formal arrangement than a joint venture, where two or more organizations collaborate for mutual profits without forming a new, separate legal entity. They pool resources (products, distribution networks, manufacturing capabilities, funding, equipment, knowledge, intellectual property) to achieve shared objectives while remaining independent.</p>
+                    <p class="mb-3">Example: The airline industry often forms strategic alliances (like Star Alliance or SkyTeam) to offer broader route networks and shared loyalty programs without merging their operations.</p>
+
+                    <h3 class="text-xl font-semibold text-orange-600 mt-6 mb-2">Merger</h3>
+                    <p class="mb-3">A Merger occurs when two or more organizations combine to form a completely new, single organization. The original entities cease to exist independently, and a new combined entity takes their place. This is often done to achieve synergies, increase market share, or reduce competition.</p>
+
+                    <h3 class="text-xl font-semibold text-orange-600 mt-6 mb-2">Acquisition</h3>
+                    <p class="mb-3">An Acquisition happens when one business buys out another business. In an acquisition, the acquiring company typically takes over the ownership and control of the target company, which may or may not cease to exist as a separate legal entity, but its ownership shifts significantly towards the acquiring partner.</p>
+
+                    <h3 class="text-xl font-semibold text-orange-600 mt-6 mb-2">Common Advantages of Mergers & Acquisitions (M&A)</h3>
+                    <ul class="list-disc list-inside mb-3 space-y-1">
+                        <li><strong>Expansion of Size:</strong> Rapidly increases the size and scale of operations.</li>
+                        <li><strong>Minimize Operational Cost:</strong> Can lead to economies of scale and reduced overheads by combining operations.</li>
+                        <li><strong>Reduce Competition:</strong> By acquiring a competitor, a company can reduce market rivalry and gain a stronger market position.</li>
+                    </ul>
+                `
+            },
+            {
+                id: "import-export-tariff-balance-of-payment",
+                title: "12. Import, Export, Tariff and Balance of Payment (Lectures 12-13)",
+                content: `
+                    <p class="mb-4 text-lg">International trade is a cornerstone of the global economy, involving the exchange of goods and services across national borders. This section clarifies key terms like imports, exports, trade barriers, and concepts related to a nation's financial transactions with the rest of the world.</p>
+                    <h3 class="text-xl font-semibold text-orange-600 mb-2">Key Terms in International Trade</h3>
+                    <ul class="list-disc list-inside mb-3 space-y-1">
+                        <li><strong>Imports:</strong> These are goods and services that are produced in one country but purchased and brought into another country for consumption.</li>
+                        <li><strong>Exports:</strong> These are goods and services that are produced domestically within a country and then sold to customers in other countries.</li>
+                        <li><strong>GATT (General Agreement on Tariff & Trade):</strong> A multilateral treaty signed after WWII aimed at reducing trade barriers (like tariffs) and promoting free international trade among member countries.</li>
+                        <li><strong>WTO (World Trade Organization):</strong> An international organization that oversees global trade rules. It aims to liberalize international trade and provides a forum for governments to negotiate trade agreements and settle disputes.</li>
+                        <li><strong>Per Capita Income:</strong> This is calculated by dividing the total income of a country by its total population. It's a key indicator used to categorize economies into high, middle, or low-income countries, reflecting the average economic output per person.</li>
+                    </ul>
+
+                    <h3 class="text-xl font-semibold text-orange-600 mt-6 mb-2">National Financial Balances</h3>
+                    <ul class="list-disc list-inside mb-3 space-y-1">
+                        <li><strong>Balance of Trade:</strong> This is the economic value of a country's total exports minus its total imports over a specific period.
+                            <ul class="list-circle list-inside ml-6">
+                                <li><strong>Trade Surplus:</strong> Occurs when a country's exports are greater than its imports.</li>
+                                <li><strong>Trade Deficit:</strong> Occurs when a country's imports are greater than its exports.</li>
+                            </ul>
+                        </li>
+                        <li><strong>National Debt:</strong> This refers to the total amount of money that a government owes to its creditors, both domestic and foreign.</li>
+                        <li><strong>Balance of Payment:</strong> This is a broader account that records all financial transactions between a country and the rest of the world over a period. It includes trade in goods and services, financial flows (investments), and transfers.
+                            <ul class="list-circle list-inside ml-6">
+                                <li><strong>Favorable Balance of Payment:</strong> When total receipts (money coming in) are greater than total payments (money going out).</li>
+                                <li><strong>Unfavorable Balance of Payment:</strong> When total payments are greater than total receipts.</li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <h3 class="text-xl font-semibold text-orange-600 mt-6 mb-2">Trade Barriers: Obstacles to Free Trade</h3>
+                    <p class="mb-3">Governments sometimes implement policies to restrict international trade, often to protect domestic industries or for political reasons. These are known as trade barriers:</p>
+                    <ul class="list-disc list-inside mb-3 space-y-1">
+                        <li><strong>Tariff:</strong> A tax imposed by a government on imported goods. This makes imported goods more expensive, encouraging consumers to buy domestically produced goods.</li>
+                        <li><strong>Quota:</strong> A physical limit on the quantity of a specific commodity that can be imported into a country during a given period.</li>
+                        <li><strong>Subsidies:</strong> Financial assistance or concessions provided by the government to domestic producers. This helps domestic industries compete with foreign imports by lowering their production costs.</li>
+                        <li><strong>Other Barriers:</strong> Beyond economic measures, trade can also be hindered by:
+                            <ul class="list-circle list-inside ml-6">
+                                <li>Social/Cultural differences</li>
+                                <li>Religious considerations</li>
+                                <li>Climate variations impacting product suitability</li>
+                                <li>Strict Laws (e.g., health, safety, pricing, packing, environment)</li>
+                                <li>Economic Differences between trading partners</li>
+                                <li>Political System differences and instability</li>
+                            </ul>
+                        </li>
+                    </ul>
+                `
+            },
+            {
+                id: "management-process-types-areas",
+                title: "13. Management Process, Types and Areas (Lecture 15)",
+                content: `
+                    <p class="mb-4 text-lg">Management is the art and science of getting things done through people. This section breaks down the core functions of management, the different levels of managers within an organization, and the various areas they oversee, along with essential skills and styles.</p>
+                    <h3 class="text-xl font-semibold text-orange-600 mb-2">Management Definition</h3>
+                    <p class="mb-3">Management is the process of coordinating and integrating work activities efficiently and effectively through other people. It's about achieving organizational goals by making the best use of resources and guiding human effort.</p>
+                    <h3 class="text-xl font-semibold text-orange-600 mb-2">Functions of Managers (The Management Process)</h3>
+                    <p class="mb-3">Managers perform several key functions that form the management process:</p>
+                    <ul class="list-disc list-inside mb-3 space-y-1">
+                        <li><strong>Planning:</strong> Determining what needs to be done, when, and how. This involves setting goals and outlining strategies to achieve them.</li>
+                        <li><strong>Organizing:</strong> Arranging resources (people, money, materials) and activities into a coherent structure to implement plans. This includes defining roles and responsibilities.</li>
+                        <li><strong>Directing (Leading):</strong> Guiding, motivating, and inspiring employees to achieve organizational objectives. This involves communication and leadership.</li>
+                        <li><strong>Controlling:</strong> Monitoring actual performance against planned goals, identifying deviations, and taking corrective actions to ensure desired results occur.</li>
+                        <li>Other functions include: Staffing (filling vacant positions), Coordination (harmonizing efforts), Communication (information flow), Conflict handling, Negotiation, and Resource Allocation.</li>
+                    </ul>
+                    <h3 class="text-xl font-semibold text-orange-600 mb-2">Types of Managers (Levels of Management)</h3>
+                    <p class="mb-3">Managers exist at different levels within an organization, each with distinct responsibilities:</p>
+                    <ul class="list-disc list-inside mb-3 space-y-1">
+                        <li><strong>Top Managers:</strong> These are senior executives (e.g., CEO, President). They are responsible for the overall performance of the organization, setting strategic goals, and making long-range plans.</li>
+                        <li><strong>Middle Managers:</strong> (e.g., Department Head, Regional Manager). They implement the strategies, policies, and decisions formulated by top management, and supervise first-line managers.</li>
+                        <li><strong>First-line Managers:</strong> (e.g., Supervisor, Team Leader). They directly supervise the work of non-managerial employees and are responsible for day-to-day operations.</li>
+                    </ul>
+                    <h3 class="text-xl font-semibold text-orange-600 mb-2">Areas of Management</h3>
+                    <p class="mb-3">Managers specialize in various functional areas within a business:</p>
+                    <ul class="list-disc list-inside mb-3 space-y-1">
+                        <li>Human Resources Management</li>
+                        <li>Operations Management (Production)</li>
+                        <li>Marketing Management</li>
+                        <li>Information Management</li>
+                        <li>Financial Management</li>
+                        <li>Public Relations Management</li>
+                        <li>Research & Development Management</li>
+                    </ul>
+                    <h3 class="text-xl font-semibold text-orange-600 mb-2">Basic Management Skills</h3>
+                    <ul class="list-disc list-inside mb-3 space-y-1">
+                        <li><strong>Technical Skills:</strong> The ability to perform a specialized task requiring specific knowledge or expertise (e.g., engineering, accounting).</li>
+                        <li><strong>Human Relations Skills:</strong> The ability to understand, motivate, and work effectively with people, both individually and in groups.</li>
+                        <li><strong>Conceptual Skills:</strong> The ability to think abstractly, diagnose and analyze complex situations, and see the organization as a whole, understanding how its parts fit together.</li>
+                    </ul>
+                    <h3 class="text-xl font-semibold text-orange-600 mb-2">Managerial Styles</h3>
+                    <ul class="list-disc list-inside mb-3 space-y-1">
+                        <li><strong>Autocratic Style:</strong> Manager makes decisions alone without much input from employees.</li>
+                        <li><strong>Democratic Style:</strong> Manager involves employees in decision-making, encouraging participation.</li>
+                        <li><strong>Free-Rein (Laissez-Faire) Style:</strong> Manager gives employees a lot of freedom to make decisions and complete tasks on their own.</li>
+                        <li><strong>Contingency Approach:</strong> The idea that there is no single "best" managerial style; the most effective style depends on the situation (contingency factors).</li>
+                    </ul>
+                `
+            },
+            {
+                id: "job-analysis-recruiting",
+                title: "14. Job Analysis & Recruiting (Lectures 15-16)",
+                content: `
+                    <p class="mb-4 text-lg">Human Resource Management is crucial for any organization, starting with understanding job roles and then finding the right people to fill them. This section delves into job analysis and the various methods of recruiting human resources.</p>
+                    <h3 class="text-xl font-semibold text-orange-600 mb-2">Job Analysis: Understanding the Role</h3>
+                    <p class="mb-3">Job analysis is a systematic process used to collect all relevant information related to a specific job. It helps in defining what a job entails and what qualities a person needs to perform it successfully. It typically results in two key documents:</p>
+                    <ul class="list-disc list-inside mb-3 space-y-1">
+                        <li><strong>Job Description:</strong> This document outlines the duties, responsibilities, working conditions, and reporting relationships of a specific job. It covers:
+                            <ul class="list-circle list-inside ml-6">
+                                <li>Job title</li>
+                                <li>Location of the job</li>
+                                <li>Specific duties to be performed</li>
+                                <li>Working environment (e.g., office, factory, remote)</li>
+                                <li>Supervision received and given</li>
+                            </ul>
+                        </li>
+                        <li><strong>Job Specification:</strong> This document describes the minimum qualifications, skills, and characteristics a person must possess to perform a job effectively. It covers:
+                            <ul class="list-circle list-inside ml-6">
+                                <li>Human skills required (e.g., communication, problem-solving)</li>
+                                <li>Educational qualifications</li>
+                                <li>Gender (if relevant for specific roles, though often avoided for equality)</li>
+                                <li>Age (if relevant and legal)</li>
+                                <li>Required experience</li>
+                                <li>Special skills (e.g., software proficiency, language skills)</li>
+                                <li>Attitude and personal attributes</li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <h3 class="text-xl font-semibold text-orange-600 mt-6 mb-2">Recruiting Human Resources: Finding the Right Talent</h3>
+                    <p class="mb-3">Recruiting human resources is the process of attracting qualified individuals to apply for open job positions within an organization. It can be done through internal or external sources:</p>
+                    <h4 class="text-lg font-medium text-orange-500 my-2">Internal Recruiting</h4>
+                    <p class="mb-3">This involves considering current employees for open positions. It can boost morale and leverage existing knowledge of the company culture.</p>
+                    <h4 class="text-lg font-medium text-orange-500 my-2">External Recruiting</h4>
+                    <p class="mb-3">This involves attracting people from outside the organization. Common sources include:</p>
+                    <ul class="list-disc list-inside ml-4 mb-3 space-y-1">
+                        <li><strong>Informal Search (References):</strong> Relying on recommendations from current employees or professional networks.</li>
+                        <li><strong>Job Posting (Notices):</strong> Advertising vacancies on company bulletin boards or internal communication channels.</li>
+                        <li><strong>Educational Institutions:</strong> Recruiting from universities, colleges, and vocational schools (e.g., through career fairs, campus placements).</li>
+                        <li><strong>Professional Associations:</strong> Utilizing industry-specific organizations to find qualified candidates.</li>
+                        <li><strong>Recruitment Agencies:</strong> Engaging specialized firms that help find and screen candidates.</li>
+                        <li><strong>Advertisement (Media):</strong> Placing job ads in newspapers, magazines, online job boards, or social media.</li>
+                    </ul>
+                `
+            },
+            {
+                id: "cola-lecture-18",
+                title: "15. Cost-Of-Living Adjustment (COLA) (Lecture 18)",
+                content: `
+                    <p class="mb-4 text-lg">The Cost-Of-Living Adjustment (COLA) is an important concept primarily found in labor contracts, designed to protect employees' purchasing power against inflation. It's a key element within the broader context of compensation and collective bargaining.</p>
+                    <h3 class="text-xl font-semibold text-orange-600 mb-2">Definition of COLA</h3>
+                    <p class="mb-3">A COLA is a clause often included in labor contracts (agreements between management and labor unions) that ties future wage raises to changes in consumer purchasing power. Essentially, it's an automatic increase in wages or benefits to account for inflation, ensuring that the real value of earnings does not decrease over time.</p>
+                    <p class="mb-3"><strong>Context:</strong> COLA is a part of <strong>Compensation</strong> strategies and is typically negotiated during <strong>Collective Bargaining</strong>, which is the process where labor unions and management negotiate terms and conditions of employment, including wages, benefits, and working conditions.</p>
+                    <p class="mb-3">The purpose of COLA is to maintain the standard of living for employees by adjusting their income in response to increases in the cost of living, usually measured by consumer price indices.</p>
+                `
+            },
+            {
+                id: "product-life-cycle", // Placeholder for Lecture 28 content
+                title: "Product Life Cycle, Branding, Packaging & Labeling (Related to Lecture 28)",
+                content: `
+                    <p class="mb-4 text-lg">The Product Life Cycle (PLC) is a crucial concept in marketing that describes the stages a product goes through from its introduction to its eventual decline. Understanding the PLC helps businesses make strategic decisions regarding marketing, pricing, and product development.</p>
+                    <h3 class="text-xl font-semibold text-orange-600 mb-2">Product Life Cycle Stages</h3>
+                    <p class="mb-4">The typical PLC consists of four main stages: Introduction, Growth, Maturity, and Decline. Each stage presents different opportunities and challenges for a product's sales and profitability.</p>
+                    <div class="chart-container bg-white p-4 rounded-lg shadow">
+                        <canvas id="plcChart"></canvas>
+                    </div>
+                    <p class="mt-4 text-sm text-gray-600">This chart visually represents the typical sales volume over the different stages of a product's life cycle. In the <strong>Introduction</strong> stage, sales are low as the product is new. During <strong>Growth</strong>, sales rapidly increase. In the <strong>Maturity</strong> stage, sales peak and then stabilize or start to decline slightly as competition increases. Finally, in the <strong>Decline</strong> stage, sales fall off significantly.</p>
+                    <p class="mt-4">This section would also typically cover concepts of Branding (creating a unique identity for a product or company), Packaging (designing and producing the container or wrapper for a product), and Labeling (providing essential information on the package). These elements are integral to a product's success and its journey through its life cycle, influencing consumer perception and purchasing decisions. For brevity, these detailed textual descriptions are omitted here but would follow a similar structured format as other topics.</p>
+                `
+            },
+            // The remaining concepts from the extracted-concepts-mgt211 will be added here.
+            // For this response, I'm focusing on providing detailed explanations for the first 18 lectures.
+            // If the user requests more, I can extend the content for the remaining concepts (19-21) as well.
+        ];
+
+        const sidebarNav = document.getElementById('sidebarNav');
+        const navListContainer = document.getElementById('navListContainer');
+        const mainContent = document.getElementById('mainContent');
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+
+        function populateNav() {
+            conceptsData.forEach(concept => {
+                const link = document.createElement('a');
+                link.href = "#";
+                link.textContent = concept.title;
+                link.classList.add('block', 'p-3', 'rounded-md', 'text-stone-700', 'hover:bg-orange-400', 'hover:text-white', 'nav-link');
+                link.dataset.conceptId = concept.id;
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showContent(concept.id);
+                    // Update active class for nav links
+                    document.querySelectorAll('#navListContainer .nav-link').forEach(nav => nav.classList.remove('active'));
+                    link.classList.add('active');
+                    if (window.innerWidth < 768) { // If mobile view
+                        navListContainer.classList.add('hidden');
+                    }
+                });
+                navListContainer.appendChild(link);
+
+                const section = document.createElement('div');
+                section.id = concept.id;
+                section.classList.add('content-section', 'bg-white', 'p-6', 'rounded-lg', 'shadow-lg');
+                section.innerHTML = `<h2 class="text-2xl font-bold text-orange-600 mb-4 border-b-2 border-orange-300 pb-2">${concept.title}</h2>${concept.content}`;
+                mainContent.appendChild(section);
+            });
+        }
+
+        function showContent(conceptId) {
+            welcomeMessage.style.display = 'none';
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            const activeSection = document.getElementById(conceptId);
+            if (activeSection) {
+                activeSection.classList.add('active');
+                if (conceptId === 'product-life-cycle') {
+                    renderPLCChart();
+                }
+                // Initialize toggles for the active section
+                initializeToggles(activeSection);
+            }
+        }
+        
+        function initializeToggles(sectionElement) {
+            sectionElement.querySelectorAll('.toggle-button').forEach(button => {
+                // Remove any existing event listeners to prevent duplicates if re-initializing
+                const newButton = button.cloneNode(true);
+                button.parentNode.replaceChild(newButton, button);
+
+                const targetUl = newButton.nextElementSibling;
+                if (targetUl && targetUl.tagName === 'UL') {
+                    newButton.addEventListener('click', () => {
+                        targetUl.classList.toggle('hidden');
+                        newButton.classList.toggle('expanded');
+                    });
+                }
+            });
+        }
+
+        function renderPLCChart() {
+            const ctx = document.getElementById('plcChart');
+            if (!ctx) return;
+            if (ctx.chart) { // If chart already exists, destroy it before re-rendering
+                 ctx.chart.destroy();
+            }
+            ctx.chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Introduction', 'Growth', 'Maturity', 'Decline'],
+                    datasets: [{
+                        label: 'Sales Volume',
+                        data: [10, 70, 100, 40], // Illustrative data
+                        borderColor: '#F97316', // orange-500
+                        backgroundColor: 'rgba(249, 115, 22, 0.2)', // Lighter orange with alpha
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Sales Volume / Profit' }
+                        },
+                        x: {
+                             title: { display: true, text: 'Time / Stages' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                        },
+                        tooltip: {
+                            enabled: true,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        mobileMenuButton.addEventListener('click', () => {
+            navListContainer.classList.toggle('hidden');
+        });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            populateNav();
+             // Set the first concept as active by default on larger screens, or show welcome
+            if (conceptsData.length > 0 && window.innerWidth >= 768) {
+                const firstConceptId = conceptsData[0].id;
+                showContent(firstConceptId);
+                const firstNavLink = document.querySelector(`#navListContainer .nav-link[data-concept-id="${firstConceptId}"]`);
+                if (firstNavLink) {
+                    firstNavLink.classList.add('active');
+                }
+            } else {
+                 welcomeMessage.style.display = 'block';
+            }
+        });
+
+    </script>
+</body>
+</html>
